@@ -92,6 +92,27 @@ Artistry::Artifact.create("task", data, strict: false)
 - Optional fields in schemas (all fields required)
 - Default values for schema fields
 - Richer query operators (like, gt, lt, etc.)
+
+## TODO: Optional Fields & Defaults
+
+Consider adding support for optional fields and default values. Design discussion notes:
+
+**Possible syntax for defaults** (array format, JSON-compatible):
+```crystal
+schema: {
+  title: "string",              # required
+  count: ["integer", 0],        # optional with default
+  status: ["string", "draft"]   # optional with default
+}
+```
+
+**Questions to resolve:**
+- Do we need nil/null support, or is "field absent" sufficient?
+- Should `?` suffix mean nullable (`"string?"`) or optional?
+- Are defaults applied at create time only, or also when field is missing on read?
+- Should defaults be stored in the artifact, or computed on access?
+
+Keep it simple - start with defaults only, skip nil support unless needed.
 - Full-text search (FTS5)
 - Transactions wrapper
 - Migration tooling for schema changes
