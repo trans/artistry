@@ -42,8 +42,8 @@ module Artistry
       CREATE INDEX IF NOT EXISTS idx_artifact_superseded ON artifact(superseded_by);
 
       CREATE TABLE IF NOT EXISTS link (
-        from_id INTEGER NOT NULL REFERENCES identity(id),
-        to_id INTEGER NOT NULL REFERENCES identity(id),
+        from_id INTEGER NOT NULL REFERENCES identity(id) ON DELETE CASCADE,
+        to_id INTEGER NOT NULL REFERENCES identity(id) ON DELETE CASCADE,
         rel TEXT NOT NULL,
         data JSON,
         created_at INTEGER NOT NULL DEFAULT (cast((julianday('now') - 2440587.5) * 86400000 as integer)),

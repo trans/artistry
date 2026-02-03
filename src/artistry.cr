@@ -6,7 +6,7 @@ require "./artistry/artifact"
 require "./artistry/link"
 
 module Artistry
-  VERSION = "0.3.0"
+  VERSION = "0.5.0"
 
   class_property db_path : String = "artistry.db"
   class_getter! db : DB::Database
@@ -14,6 +14,7 @@ module Artistry
   def self.open(path : String = db_path) : DB::Database
     uri = path == ":memory:" ? "sqlite3:%3Amemory%3A" : "sqlite3://#{path}"
     db = DB.open(uri)
+    db.exec("PRAGMA foreign_keys = ON")
     @@db = db
     Database.ensure_schema(db)
     db
