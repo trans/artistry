@@ -18,20 +18,23 @@ We chose a single `artifact` table with JSON `data` column rather than creating 
 We explicitly decided NOT to make this an ORM. Users who want typed wrappers can build thin classes over `Artifact` themselves. Artistry stays focused on the registry/identity/versioning layer.
 
 ### Links vs Edges
-We went with "link" terminology (not "edge") because of the hyperlink metaphor that inspired the design. The `link` table is separate from COW versioning - those are different concerns.
+We went with "link" terminology (not "edge") because of the hyperlink metaphor that inspired the design. The `link` table uses `rel` (relation) to describe the relationship type - avoiding confusion with artifact "kind". The link table is separate from COW versioning - those are different concerns.
 
 ### Slugs
 Format is `{CODE}{ID}` with no separator, e.g., `E42` not `E:42`. The colon was deemed unnecessary.
+
+### Schema Validation
+Validation is always enabled (no opt-out). Strict mode is default (unknown fields rejected). Use `strict: false` to allow extra fields. All schema fields are required - no optional fields or defaults (kept simple for now).
 
 ## Tables
 
 | Table | Purpose |
 |-------|---------|
 | `identity` | Global auto-increment ID, `created_at` |
-| `registry` | Kind registrations: `code`, `kind`, `plugin`, `description`, `version` |
+| `registry` | Kind registrations: `code`, `kind`, `plugin`, `description`, `symbol`, `version` |
 | `schema` | Versioned schemas: `code`, `version`, `json`, `hash`, `created_at` |
 | `artifact` | All data: `id`, `code`, `version`, `data` (JSON), `hash`, `superseded_by`, `updated_at` |
-| `link` | Cross-references: `from_id`, `to_id`, `kind`, `data` (JSON), `created_at` |
+| `link` | Cross-references: `from_id`, `to_id`, `rel`, `data` (JSON), `created_at` |
 
 ## Kind Code Allocation
 
@@ -43,11 +46,39 @@ When registering `kind: "event"`, the system assigns the shortest available pref
 
 First-come-first-serve.
 
+## Schema Validation
+
+Supported types: `string`, `integer`, `float`, `number`, `boolean`, `array`, `object`, `any`
+
+```crystal
+Artistry::Registry.register(
+  kind: "task",
+  plugin: "app",
+  schema: {title: "string", count: "integer", done: "boolean"}
+)
+
+# Valid
+Artistry::Artifact.create("task", {title: "Test", count: 1, done: false})
+
+# Invalid - wrong type
+Artistry::Artifact.create("task", {title: 123, ...})
+# => ValidationError: title: expected string, got integer
+
+# Invalid - unknown field (strict default)
+Artistry::Artifact.create("task", {..., extra: "x"})
+# => ValidationError: extra: unknown field
+
+# Allow unknown fields
+Artistry::Artifact.create("task", data, strict: false)
+```
+
 ## What's Implemented
 
 - Registration with auto-code assignment
 - Schema versioning (bumps version when schema hash changes)
+- Schema validation with type checking
 - Expression indexes via `index: ["field1", "field2"]`
+- Optional `symbol` field for emoji association with kinds
 - Artifact CRUD
 - COW updates with `superseded_by` chain
 - Mutable updates via `update!`
@@ -58,7 +89,8 @@ First-come-first-serve.
 
 ## What's NOT Implemented
 
-- Schema validation (data is not validated against schema on create/update)
+- Optional fields in schemas (all fields required)
+- Default values for schema fields
 - Richer query operators (like, gt, lt, etc.)
 - Full-text search (FTS5)
 - Transactions wrapper
@@ -76,6 +108,7 @@ Artistry::Registry.register(
   kind: "event",
   plugin: "myapp",
   schema: {title: "string"},
+  symbol: "📅",
   index: ["title"]
 )
 
@@ -89,9 +122,9 @@ new_version = artifact.update({title: "Updated"})
 artifact.update!({title: "Changed"})
 
 # Links
-Artistry::Link.create(from, to, "relationship")
-Artistry::Link.from(artifact, "relationship")
-Artistry::Link.to(artifact, "relationship")
+Artistry::Link.create(from, to, "organizer")
+Artistry::Link.from(artifact, "organizer")
+Artistry::Link.to(artifact, "organizer")
 ```
 
 ## File Structure
@@ -101,11 +134,12 @@ src/
   artistry.cr         # Main module, open/close DB
   artistry/
     database.cr       # Schema DDL
+    validator.cr      # Schema validation
     registry.cr       # Registration logic
     artifact.cr       # Artifact CRUD, COW, queries
     link.cr           # Cross-references
 spec/
-  artistry_spec.cr    # 30 specs covering all features
+  artistry_spec.cr    # 45 specs covering all features
 ```
 
 ## Testing
