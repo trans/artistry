@@ -26,6 +26,12 @@ Format is `{CODE}{ID}` with no separator, e.g., `E42` not `E:42`. The colon was 
 ### Schema Validation
 Validation is always enabled (no opt-out). Strict mode is default (unknown fields rejected). Use `strict: false` to allow extra fields. All schema fields are required - no optional fields or defaults (kept simple for now).
 
+### Timestamps
+All timestamps (`created_at`, `updated_at`) are stored as INTEGER (unix epoch milliseconds) for performance. Convert with `Time.unix_ms(timestamp)` in Crystal or `datetime(ts/1000, 'unixepoch')` in SQL.
+
+### Foreign Key Enforcement
+FK constraints are enforced (`PRAGMA foreign_keys = ON`). Link table FKs use `ON DELETE CASCADE` - deleting an artifact automatically removes all links to/from it.
+
 ## Tables
 
 | Table | Purpose |

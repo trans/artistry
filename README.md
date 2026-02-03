@@ -9,7 +9,7 @@
 - **JSON Payload** - Flexible schema stored as JSON, with expression indexes for performance
 - **Schema Validation** - Type checking on create and update (strict by default)
 - **COW Versioning** - Updates create new versions by default; full history preserved
-- **Links** - Cross-reference any artifact to any other with typed relations
+- **Links** - Cross-reference any artifact to any other with typed relations (auto-deleted with CASCADE)
 
 ## Installation
 
@@ -130,7 +130,7 @@ Modifies in place:
 
 ```crystal
 artifact.update!({title: "Changed"})
-artifact.updated_at  # => timestamp
+artifact.updated_at  # => unix milliseconds (Int64)
 ```
 
 ### Links
@@ -173,7 +173,12 @@ Artistry::Artifact.where("E", include_superseded: true)
 | `registry` | Kind registrations (`code`, `kind`, `plugin`, `description`, `symbol`, `version`) |
 | `schema` | Versioned schemas with JSON and hash |
 | `artifact` | All artifacts (JSON payload, COW tracking via `superseded_by`) |
-| `link` | Cross-artifact references (`from_id`, `to_id`, `rel`, `data`) |
+| `link` | Cross-artifact references (`from_id`, `to_id`, `rel`, `data`) - CASCADE delete |
+
+## Technical Notes
+
+- **Timestamps**: All `created_at`/`updated_at` fields are unix epoch milliseconds (Int64). Convert with `Time.unix_ms(ts)` in Crystal.
+- **Foreign Keys**: FK constraints are enforced. Link FKs use `ON DELETE CASCADE` - deleting an artifact removes its links.
 
 ## License
 
