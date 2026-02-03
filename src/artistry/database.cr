@@ -11,6 +11,7 @@ module Artistry
         kind TEXT NOT NULL,
         plugin TEXT NOT NULL,
         description TEXT,
+        symbol TEXT,
         version INTEGER NOT NULL DEFAULT 1,
         UNIQUE(plugin, kind)
       );
@@ -43,10 +44,10 @@ module Artistry
       CREATE TABLE IF NOT EXISTS link (
         from_id INTEGER NOT NULL REFERENCES identity(id),
         to_id INTEGER NOT NULL REFERENCES identity(id),
-        kind TEXT NOT NULL,
+        rel TEXT NOT NULL,
         data JSON,
         created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
-        PRIMARY KEY (from_id, to_id, kind)
+        PRIMARY KEY (from_id, to_id, rel)
       );
     SQL
 

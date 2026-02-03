@@ -7,9 +7,10 @@ module Artistry
     getter kind : String
     getter plugin : String
     getter description : String?
+    getter symbol : String?
     getter version : Int32
 
-    def initialize(@code, @kind, @plugin, @description, @version)
+    def initialize(@code, @kind, @plugin, @description, @symbol, @version)
     end
 
     # Register a new artifact kind. Returns the assigned code.
@@ -20,6 +21,7 @@ module Artistry
       plugin : String,
       schema,
       description : String? = nil,
+      symbol : String? = nil,
       index : Array(String) = [] of String
     ) : String
       db = Artistry.db
@@ -68,8 +70,8 @@ module Artistry
       code = allocate_code(db, kind)
 
       db.exec(
-        "INSERT INTO registry (code, kind, plugin, description, version) VALUES (?, ?, ?, ?, 1)",
-        code, kind, plugin, description
+        "INSERT INTO registry (code, kind, plugin, description, symbol, version) VALUES (?, ?, ?, ?, ?, 1)",
+        code, kind, plugin, description, symbol
       )
 
       schema_json = normalize_schema(schema)
@@ -136,9 +138,9 @@ module Artistry
     # Lookup a registration by code
     def self.find(code : String) : Registry?
       row = Artistry.db.query_one?(
-        "SELECT code, kind, plugin, description, version FROM registry WHERE code = ?",
+        "SELECT code, kind, plugin, description, symbol, version FROM registry WHERE code = ?",
         code,
-        as: {String, String, String, String?, Int32}
+        as: {String, String, String, String?, String?, Int32}
       )
       return nil unless row
       Registry.new(*row)
@@ -147,9 +149,9 @@ module Artistry
     # Lookup a registration by plugin and kind
     def self.find(plugin : String, kind : String) : Registry?
       row = Artistry.db.query_one?(
-        "SELECT code, kind, plugin, description, version FROM registry WHERE plugin = ? AND kind = ?",
+        "SELECT code, kind, plugin, description, symbol, version FROM registry WHERE plugin = ? AND kind = ?",
         plugin.downcase, kind.downcase,
-        as: {String, String, String, String?, Int32}
+        as: {String, String, String, String?, String?, Int32}
       )
       return nil unless row
       Registry.new(*row)
@@ -158,9 +160,9 @@ module Artistry
     # Lookup a registration by kind name only (returns first match if multiple plugins use same kind)
     def self.find_by_kind(kind : String) : Registry?
       row = Artistry.db.query_one?(
-        "SELECT code, kind, plugin, description, version FROM registry WHERE kind = ? LIMIT 1",
+        "SELECT code, kind, plugin, description, symbol, version FROM registry WHERE kind = ? LIMIT 1",
         kind.downcase,
-        as: {String, String, String, String?, Int32}
+        as: {String, String, String, String?, String?, Int32}
       )
       return nil unless row
       Registry.new(*row)
@@ -170,13 +172,14 @@ module Artistry
     def self.all : Array(Registry)
       results = [] of Registry
       Artistry.db.query(
-        "SELECT code, kind, plugin, description, version FROM registry ORDER BY code"
+        "SELECT code, kind, plugin, description, symbol, version FROM registry ORDER BY code"
       ) do |rs|
         rs.each do
           results << Registry.new(
             rs.read(String),
             rs.read(String),
             rs.read(String),
+            rs.read(String?),
             rs.read(String?),
             rs.read(Int32)
           )

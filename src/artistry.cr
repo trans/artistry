@@ -5,7 +5,7 @@ require "./artistry/artifact"
 require "./artistry/link"
 
 module Artistry
-  VERSION = "0.1.0"
+  VERSION = "0.2.0"
 
   class_property db_path : String = "artistry.db"
   class_getter! db : DB::Database

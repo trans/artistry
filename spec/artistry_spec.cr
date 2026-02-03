@@ -245,7 +245,7 @@ describe Artistry do
       link = Artistry::Link.create(event, person, "organizer")
       link.from_id.should eq(event.id)
       link.to_id.should eq(person.id)
-      link.kind.should eq("organizer")
+      link.rel.should eq("organizer")
     end
 
     it "creates link with data" do
