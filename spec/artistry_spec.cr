@@ -120,8 +120,8 @@ describe Artistry do
     end
 
     it "queries with conditions" do
-      Artistry::Artifact.create("E", {title: "Meeting", priority: "high"})
-      Artistry::Artifact.create("E", {title: "Lunch", priority: "low"})
+      Artistry::Artifact.create("E", {title: "Meeting", priority: "high"}, strict: false)
+      Artistry::Artifact.create("E", {title: "Lunch", priority: "low"}, strict: false)
       results = Artistry::Artifact.where("E", priority: "high")
       results.size.should eq(1)
       results[0]["title"].as_s.should eq("Meeting")
@@ -298,6 +298,153 @@ describe Artistry do
       link.delete
 
       Artistry::Link.find(event.id, person.id, "organizer").should be_nil
+    end
+  end
+
+  describe Artistry::Validator do
+    before_each do
+      Artistry::Registry.register(
+        kind: "task",
+        plugin: "test",
+        schema: {
+          title: "string",
+          count: "integer",
+          score: "float",
+          done: "boolean",
+          tags: "array",
+          meta: "object",
+        }
+      )
+    end
+
+    describe "type validation" do
+      it "accepts valid string field" do
+        artifact = Artistry::Artifact.create("task", {
+          title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
+        })
+        artifact["title"].as_s.should eq("Test")
+      end
+
+      it "rejects wrong type for string field" do
+        expect_raises(Artistry::ValidationError, /title.*expected string/) do
+          Artistry::Artifact.create("task", {
+            title: 123, count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
+          })
+        end
+      end
+
+      it "accepts valid integer field" do
+        artifact = Artistry::Artifact.create("task", {
+          title: "Test", count: 42, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
+        })
+        artifact["count"].as_i.should eq(42)
+      end
+
+      it "rejects wrong type for integer field" do
+        expect_raises(Artistry::ValidationError, /count.*expected integer/) do
+          Artistry::Artifact.create("task", {
+            title: "Test", count: "not a number", score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
+          })
+        end
+      end
+
+      it "accepts valid float field" do
+        artifact = Artistry::Artifact.create("task", {
+          title: "Test", count: 1, score: 3.14, done: false, tags: [] of String, meta: {} of String => String,
+        })
+        artifact["score"].as_f.should eq(3.14)
+      end
+
+      it "accepts valid boolean field" do
+        artifact = Artistry::Artifact.create("task", {
+          title: "Test", count: 1, score: 1.5, done: true, tags: [] of String, meta: {} of String => String,
+        })
+        artifact["done"].as_bool.should eq(true)
+      end
+
+      it "accepts valid array field" do
+        artifact = Artistry::Artifact.create("task", {
+          title: "Test", count: 1, score: 1.5, done: false, tags: ["a", "b"], meta: {} of String => String,
+        })
+        artifact["tags"].as_a.size.should eq(2)
+      end
+
+      it "accepts valid object field" do
+        artifact = Artistry::Artifact.create("task", {
+          title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {key: "value"},
+        })
+        artifact["meta"]["key"].as_s.should eq("value")
+      end
+    end
+
+    describe "required fields" do
+      it "rejects missing required field" do
+        expect_raises(Artistry::ValidationError, /title.*required/) do
+          Artistry::Artifact.create("task", {
+            count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
+          })
+        end
+      end
+    end
+
+    describe "strict mode" do
+      it "rejects unknown fields by default" do
+        expect_raises(Artistry::ValidationError, /extra.*unknown field/) do
+          Artistry::Artifact.create("task", {
+            title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String, extra: "data",
+          })
+        end
+      end
+
+      it "allows unknown fields with strict: false" do
+        artifact = Artistry::Artifact.create("task", {
+          title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String, extra: "data",
+        }, strict: false)
+        artifact["extra"].as_s.should eq("data")
+      end
+    end
+
+    describe "update validation" do
+      it "validates on COW update" do
+        artifact = Artistry::Artifact.create("task", {
+          title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
+        })
+        expect_raises(Artistry::ValidationError, /count.*expected integer/) do
+          artifact.update({count: "invalid"})
+        end
+      end
+
+      it "validates on mutable update" do
+        artifact = Artistry::Artifact.create("task", {
+          title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
+        })
+        expect_raises(Artistry::ValidationError, /count.*expected integer/) do
+          artifact.update!({count: "invalid"})
+        end
+      end
+
+      it "allows unknown fields on update with strict: false" do
+        artifact = Artistry::Artifact.create("task", {
+          title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
+        })
+        updated = artifact.update({extra: "data"}, strict: false)
+        updated["extra"].as_s.should eq("data")
+      end
+    end
+
+    describe "multiple errors" do
+      it "reports all validation errors" do
+        begin
+          Artistry::Artifact.create("task", {
+            title: 123, count: "wrong", score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
+          })
+          fail "Expected ValidationError"
+        rescue ex : Artistry::ValidationError
+          ex.errors.size.should eq(2)
+          ex.errors.map(&.field).should contain("title")
+          ex.errors.map(&.field).should contain("count")
+        end
+      end
     end
   end
 end

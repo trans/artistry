@@ -168,6 +168,16 @@ module Artistry
       Registry.new(*row)
     end
 
+    # Get the schema JSON for a code and version
+    def self.get_schema(code : String, version : Int32) : JSON::Any?
+      json = Artistry.db.query_one?(
+        "SELECT json FROM schema WHERE code = ? AND version = ?",
+        code, version,
+        as: String
+      )
+      json ? JSON.parse(json) : nil
+    end
+
     # List all registrations
     def self.all : Array(Registry)
       results = [] of Registry
