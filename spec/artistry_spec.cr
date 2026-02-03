@@ -141,10 +141,10 @@ describe Artistry do
         v1 = Artistry::Artifact.create("E", {title: "Draft"})
         v2 = v1.update({title: "Final"})
 
-        # Reload v1 to see superseded_by
+        # Reload v1 to see new_id
         v1_reloaded = Artistry::Artifact.find(v1.id).not_nil!
         v1_reloaded.superseded?.should be_true
-        v1_reloaded.superseded_by.should eq(v2.id)
+        v1_reloaded.new_id.should eq(v2.id)
       end
 
       it "follows successor chain" do

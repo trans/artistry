@@ -172,7 +172,7 @@ Artistry::Artifact.where("E", include_superseded: true)
 | `identity` | Global ID generator with `created_at` |
 | `registry` | Kind registrations (`code`, `kind`, `plugin`, `description`, `symbol`, `version`) |
 | `schema` | Versioned schemas with JSON and hash |
-| `artifact` | All artifacts (JSON payload, COW tracking via `superseded_by`) |
+| `artifact` | All artifacts (JSON payload, COW tracking via `new_id`) |
 | `link` | Cross-artifact references (`from_id`, `to_id`, `rel`, `data`) - CASCADE delete |
 
 ## Technical Notes

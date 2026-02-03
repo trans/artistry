@@ -39,7 +39,7 @@ FK constraints are enforced (`PRAGMA foreign_keys = ON`). Link table FKs use `ON
 | `identity` | Global auto-increment ID, `created_at` |
 | `registry` | Kind registrations: `code`, `kind`, `plugin`, `description`, `symbol`, `version` |
 | `schema` | Versioned schemas: `code`, `version`, `json`, `hash`, `created_at` |
-| `artifact` | All data: `id`, `code`, `version`, `data` (JSON), `hash`, `superseded_by`, `updated_at` |
+| `artifact` | All data: `id`, `code`, `version`, `data` (JSON), `hash`, `new_id`, `updated_at` |
 | `link` | Cross-references: `from_id`, `to_id`, `rel`, `data` (JSON), `created_at` |
 
 ## Kind Code Allocation
@@ -86,7 +86,7 @@ Artistry::Artifact.create("task", data, strict: false)
 - Expression indexes via `index: ["field1", "field2"]`
 - Optional `symbol` field for emoji association with kinds
 - Artifact CRUD
-- COW updates with `superseded_by` chain
+- COW updates with `new_id` chain
 - Mutable updates via `update!`
 - History traversal: `successor`, `latest`, `history`
 - Queries: `find(id)`, `find(slug)`, `where(code)`, `where(code, field: value)`

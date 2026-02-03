@@ -9,11 +9,11 @@ module Artistry
     getter data : JSON::Any
     getter hash : String
     getter created_at : Int64
-    getter superseded_by : Int64?
+    getter new_id : Int64?
     getter updated_at : Int64?
 
     def initialize(@id, @code, @version, @data, @hash, @created_at,
-                   @superseded_by = nil, @updated_at = nil)
+                   @new_id = nil, @updated_at = nil)
     end
 
     def self.hash_data(data_json : String) : String
@@ -95,7 +95,7 @@ module Artistry
     def self.find(id : Int64) : Artifact?
       row = Artistry.db.query_one?(
         "SELECT a.id, a.code, a.version, a.data, a.hash, i.created_at,
-                a.superseded_by, a.updated_at
+                a.new_id, a.updated_at
          FROM artifact a
          JOIN identity i ON a.id = i.id
          WHERE a.id = ?",
@@ -124,17 +124,17 @@ module Artistry
       results = [] of Artifact
       sql = if include_superseded
               "SELECT a.id, a.code, a.version, a.data, a.hash, i.created_at,
-                      a.superseded_by, a.updated_at
+                      a.new_id, a.updated_at
                FROM artifact a
                JOIN identity i ON a.id = i.id
                WHERE a.code = ?
                ORDER BY a.id"
             else
               "SELECT a.id, a.code, a.version, a.data, a.hash, i.created_at,
-                      a.superseded_by, a.updated_at
+                      a.new_id, a.updated_at
                FROM artifact a
                JOIN identity i ON a.id = i.id
-               WHERE a.code = ? AND a.superseded_by IS NULL
+               WHERE a.code = ? AND a.new_id IS NULL
                ORDER BY a.id"
             end
 
@@ -160,7 +160,7 @@ module Artistry
       return where(code, include_superseded) if conditions.empty?
 
       where_clauses = ["a.code = ?"]
-      where_clauses << "a.superseded_by IS NULL" unless include_superseded
+      where_clauses << "a.new_id IS NULL" unless include_superseded
       params = [code] of DB::Any
 
       conditions.each do |key, value|
@@ -170,7 +170,7 @@ module Artistry
 
       sql = <<-SQL
         SELECT a.id, a.code, a.version, a.data, a.hash, i.created_at,
-               a.superseded_by, a.updated_at
+               a.new_id, a.updated_at
         FROM artifact a
         JOIN identity i ON a.id = i.id
         WHERE #{where_clauses.join(" AND ")}
@@ -202,17 +202,17 @@ module Artistry
 
     # Is this the current (non-superseded) version?
     def current? : Bool
-      superseded_by.nil?
+      new_id.nil?
     end
 
     # Has this been superseded by a newer version?
     def superseded? : Bool
-      !superseded_by.nil?
+      !new_id.nil?
     end
 
     # Get the artifact that superseded this one
     def successor : Artifact?
-      sid = superseded_by
+      sid = new_id
       return nil unless sid
       Artifact.find(sid)
     end
@@ -235,7 +235,7 @@ module Artistry
       loop do
         # Find what superseded by this one
         prev = Artistry.db.query_one?(
-          "SELECT id FROM artifact WHERE superseded_by = ?",
+          "SELECT id FROM artifact WHERE new_id = ?",
           root.id,
           as: Int64
         )
@@ -306,7 +306,7 @@ module Artistry
 
       # Mark this artifact as superseded
       db.exec(
-        "UPDATE artifact SET superseded_by = ? WHERE id = ?",
+        "UPDATE artifact SET new_id = ? WHERE id = ?",
         new_id, id
       )
 
@@ -352,7 +352,7 @@ module Artistry
       )
 
       Artifact.new(id, code, current_version, merged_parsed, data_hash, created_at,
-                   superseded_by, now)
+                   new_id, now)
     end
 
     # Delete artifact (hard delete)

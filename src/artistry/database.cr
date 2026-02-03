@@ -32,14 +32,14 @@ module Artistry
         version INTEGER NOT NULL,
         data JSON NOT NULL,
         hash TEXT NOT NULL,
-        superseded_by INTEGER REFERENCES identity(id),
+        new_id INTEGER REFERENCES identity(id),
         updated_at INTEGER,
         FOREIGN KEY (id) REFERENCES identity(id),
         FOREIGN KEY (code, version) REFERENCES schema(code, version)
       );
 
       CREATE INDEX IF NOT EXISTS idx_artifact_code ON artifact(code);
-      CREATE INDEX IF NOT EXISTS idx_artifact_superseded ON artifact(superseded_by);
+      CREATE INDEX IF NOT EXISTS idx_artifact_new_id ON artifact(new_id);
 
       CREATE TABLE IF NOT EXISTS link (
         from_id INTEGER NOT NULL REFERENCES identity(id) ON DELETE CASCADE,
