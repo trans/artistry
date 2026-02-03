@@ -3,7 +3,7 @@ module Artistry
     SCHEMA = <<-SQL
       CREATE TABLE IF NOT EXISTS identity (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        created_at INTEGER NOT NULL DEFAULT (cast((julianday('now') - 2440587.5) * 86400000 as integer))
       );
 
       CREATE TABLE IF NOT EXISTS registry (
@@ -21,7 +21,7 @@ module Artistry
         version INTEGER NOT NULL,
         json TEXT NOT NULL,
         hash TEXT NOT NULL,
-        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+        created_at INTEGER NOT NULL DEFAULT (cast((julianday('now') - 2440587.5) * 86400000 as integer)),
         PRIMARY KEY (code, version),
         FOREIGN KEY (code) REFERENCES registry(code)
       );
@@ -46,7 +46,7 @@ module Artistry
         to_id INTEGER NOT NULL REFERENCES identity(id),
         rel TEXT NOT NULL,
         data JSON,
-        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+        created_at INTEGER NOT NULL DEFAULT (cast((julianday('now') - 2440587.5) * 86400000 as integer)),
         PRIMARY KEY (from_id, to_id, rel)
       );
     SQL

@@ -20,8 +20,8 @@ module Artistry
       Digest::SHA256.hexdigest(data_json)
     end
 
-    protected def self.now_unix : Int64
-      Time.utc.to_unix
+    protected def self.now_ms : Int64
+      Time.utc.to_unix_ms
     end
 
     # Create a new artifact (internal - by registry)
@@ -344,7 +344,7 @@ module Artistry
 
       data_json = merged.to_json
       data_hash = Artifact.hash_data(data_json)
-      now = Artifact.now_unix
+      now = Artifact.now_ms
 
       db.exec(
         "UPDATE artifact SET data = ?, version = ?, hash = ?, updated_at = ? WHERE id = ?",
