@@ -6,7 +6,7 @@ module Artistry
     getter to_id : Int64
     getter rel : String
     getter data : JSON::Any?
-    getter created_at : String
+    getter created_at : Int64
 
     def initialize(@from_id, @to_id, @rel, @data, @created_at)
     end
@@ -26,7 +26,7 @@ module Artistry
       created_at = Artistry.db.query_one(
         "SELECT created_at FROM link WHERE from_id = ? AND to_id = ? AND rel = ?",
         from_id, to_id, rel,
-        as: String
+        as: Int64
       )
 
       Link.new(from_id, to_id, rel, data_json ? JSON.parse(data_json) : nil, created_at)
@@ -47,7 +47,7 @@ module Artistry
         "SELECT from_id, to_id, rel, data, created_at FROM link
          WHERE from_id = ? AND to_id = ? AND rel = ?",
         from_id, to_id, rel,
-        as: {Int64, Int64, String, String?, String}
+        as: {Int64, Int64, String, String?, Int64}
       )
       return nil unless row
       data_str = row[3]
@@ -75,7 +75,7 @@ module Artistry
           to = rs.read(Int64)
           r = rs.read(String)
           data_str = rs.read(String?)
-          created = rs.read(String)
+          created = rs.read(Int64)
           results << Link.new(from, to, r, data_str ? JSON.parse(data_str) : nil, created)
         end
       end
@@ -103,7 +103,7 @@ module Artistry
           to = rs.read(Int64)
           r = rs.read(String)
           data_str = rs.read(String?)
-          created = rs.read(String)
+          created = rs.read(Int64)
           results << Link.new(from, to, r, data_str ? JSON.parse(data_str) : nil, created)
         end
       end

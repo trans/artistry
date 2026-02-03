@@ -8,9 +8,9 @@ module Artistry
     getter version : Int32
     getter data : JSON::Any
     getter hash : String
-    getter created_at : String
+    getter created_at : Int64
     getter superseded_by : Int64?
-    getter updated_at : String?
+    getter updated_at : Int64?
 
     def initialize(@id, @code, @version, @data, @hash, @created_at,
                    @superseded_by = nil, @updated_at = nil)
@@ -20,8 +20,8 @@ module Artistry
       Digest::SHA256.hexdigest(data_json)
     end
 
-    protected def self.now_iso8601 : String
-      Time.utc.to_s("%Y-%m-%dT%H:%M:%SZ")
+    protected def self.now_unix : Int64
+      Time.utc.to_unix
     end
 
     # Create a new artifact (internal - by registry)
@@ -52,7 +52,7 @@ module Artistry
       created_at = db.query_one(
         "SELECT created_at FROM identity WHERE id = ?",
         id,
-        as: String
+        as: Int64
       )
 
       Artifact.new(id, reg.code, reg.version, data_parsed, data_hash, created_at)
@@ -85,9 +85,9 @@ module Artistry
         row[2].as(Int32),
         JSON.parse(row[3].as(String)),
         row[4].as(String),
-        row[5].as(String),
+        row[5].as(Int64),
         row[6].as(Int64?),
-        row[7].as(String?)
+        row[7].as(Int64?)
       )
     end
 
@@ -100,7 +100,7 @@ module Artistry
          JOIN identity i ON a.id = i.id
          WHERE a.id = ?",
         id,
-        as: {Int64, String, Int32, String, String, String, Int64?, String?}
+        as: {Int64, String, Int32, String, String, Int64, Int64?, Int64?}
       )
       return nil unless row
       from_row(row)
@@ -146,9 +146,9 @@ module Artistry
             rs.read(Int32),
             JSON.parse(rs.read(String)),
             rs.read(String),
-            rs.read(String),
+            rs.read(Int64),
             rs.read(Int64?),
-            rs.read(String?)
+            rs.read(Int64?)
           )
         end
       end
@@ -186,9 +186,9 @@ module Artistry
             rs.read(Int32),
             JSON.parse(rs.read(String)),
             rs.read(String),
-            rs.read(String),
+            rs.read(Int64),
             rs.read(Int64?),
-            rs.read(String?)
+            rs.read(Int64?)
           )
         end
       end
@@ -313,7 +313,7 @@ module Artistry
       new_created_at = db.query_one(
         "SELECT created_at FROM identity WHERE id = ?",
         new_id,
-        as: String
+        as: Int64
       )
 
       Artifact.new(new_id, code, current_version, merged_parsed, data_hash, new_created_at)
@@ -344,7 +344,7 @@ module Artistry
 
       data_json = merged.to_json
       data_hash = Artifact.hash_data(data_json)
-      now = Artifact.now_iso8601
+      now = Artifact.now_unix
 
       db.exec(
         "UPDATE artifact SET data = ?, version = ?, hash = ?, updated_at = ? WHERE id = ?",

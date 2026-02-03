@@ -3,7 +3,7 @@ module Artistry
     SCHEMA = <<-SQL
       CREATE TABLE IF NOT EXISTS identity (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
       );
 
       CREATE TABLE IF NOT EXISTS registry (
@@ -21,7 +21,7 @@ module Artistry
         version INTEGER NOT NULL,
         json TEXT NOT NULL,
         hash TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
         PRIMARY KEY (code, version),
         FOREIGN KEY (code) REFERENCES registry(code)
       );
@@ -33,7 +33,7 @@ module Artistry
         data JSON NOT NULL,
         hash TEXT NOT NULL,
         superseded_by INTEGER REFERENCES identity(id),
-        updated_at TEXT,
+        updated_at INTEGER,
         FOREIGN KEY (id) REFERENCES identity(id),
         FOREIGN KEY (code, version) REFERENCES schema(code, version)
       );
@@ -46,7 +46,7 @@ module Artistry
         to_id INTEGER NOT NULL REFERENCES identity(id),
         rel TEXT NOT NULL,
         data JSON,
-        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
         PRIMARY KEY (from_id, to_id, rel)
       );
     SQL
