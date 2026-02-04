@@ -93,12 +93,6 @@ Artistry::Artifact.create("task", data, strict: false)
 - `include_superseded: true` option for queries
 - Links between artifacts with optional data payload
 
-## What's NOT Implemented
-
-- Optional fields in schemas (all fields required)
-- Default values for schema fields
-- Richer query operators (like, gt, lt, etc.)
-
 ## TODO: Optional Fields & Defaults
 
 Consider adding support for optional fields and default values. Design discussion notes:
@@ -119,6 +113,22 @@ schema: {
 - Should defaults be stored in the artifact, or computed on access?
 
 Keep it simple - start with defaults only, skip nil support unless needed.
+
+## TODO: Tags Table?
+
+Debating whether to add a dedicated `tag` table for tagging artifacts. Questions to consider:
+- Should tags be a separate table, or just use links with `rel: "tag"`?
+- If separate: `tag` table with `artifact_id`, `name` (and maybe `namespace`)?
+- Do tags need to be artifacts themselves (so they can have metadata)?
+- Or keep it simple: tags are just strings, no identity
+
+Links already provide arbitrary relationships - tags could be modeled as links to "tag" artifacts. But a dedicated table might be simpler for common tagging use cases.
+
+## What's NOT Implemented
+
+- Optional fields in schemas (all fields required)
+- Default values for schema fields
+- Richer query operators (like, gt, lt, etc.)
 - Full-text search (FTS5)
 - Transactions wrapper
 - Migration tooling for schema changes
