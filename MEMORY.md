@@ -41,6 +41,8 @@ FK constraints are enforced (`PRAGMA foreign_keys = ON`). Link table FKs use `ON
 | `schema` | Versioned schemas: `code`, `version`, `json`, `hash`, `created_at` |
 | `artifact` | All data: `id`, `code`, `version`, `data` (JSON), `hash`, `new_id`, `updated_at` |
 | `link` | Cross-references: `from_id`, `to_id`, `rel`, `data` (JSON), `created_at` |
+| `tag` | Unique tag names: `id`, `name`, `created_at` |
+| `tagging` | Junction: `tag_id`, `artifact_id`, `created_at` |
 
 ## Kind Code Allocation
 
@@ -92,6 +94,7 @@ Artistry::Artifact.create("task", data, strict: false)
 - Queries: `find(id)`, `find(slug)`, `where(code)`, `where(code, field: value)`
 - `include_superseded: true` option for queries
 - Links between artifacts with optional data payload
+- Tags with normalized two-table design (tag + tagging junction)
 
 ## TODO: Optional Fields & Defaults
 
@@ -114,15 +117,13 @@ schema: {
 
 Keep it simple - start with defaults only, skip nil support unless needed.
 
-## TODO: Tags Table?
+## Tags (Implemented)
 
-Debating whether to add a dedicated `tag` table for tagging artifacts. Questions to consider:
-- Should tags be a separate table, or just use links with `rel: "tag"`?
-- If separate: `tag` table with `artifact_id`, `name` (and maybe `namespace`)?
-- Do tags need to be artifacts themselves (so they can have metadata)?
-- Or keep it simple: tags are just strings, no identity
-
-Links already provide arbitrary relationships - tags could be modeled as links to "tag" artifacts. But a dedicated table might be simpler for common tagging use cases.
+Normalized two-table design:
+- `tag` table: `id`, `name` (UNIQUE), `created_at` — each string stored once
+- `tagging` junction table: `tag_id`, `artifact_id` (composite PK), `created_at` — CASCADE both directions
+- No namespaces (flat names, convention-based if needed)
+- `Tag.tag/untag/sync` for tagging, `Tag.for/artifacts/artifacts_any/artifacts_all` for queries
 
 ## What's NOT Implemented
 
@@ -162,6 +163,15 @@ artifact.update!({title: "Changed"})
 Artistry::Link.create(from, to, "organizer")
 Artistry::Link.from(artifact, "organizer")
 Artistry::Link.to(artifact, "organizer")
+
+# Tags
+Artistry::Tag.tag(artifact, "security")
+Artistry::Tag.untag(artifact, "security")
+Artistry::Tag.sync(artifact, ["v2", "released"])
+Artistry::Tag.for(artifact)
+Artistry::Tag.artifacts("security")
+Artistry::Tag.artifacts_any(["security", "mvp"])
+Artistry::Tag.artifacts_all(["security", "mvp"])
 ```
 
 ## File Structure
@@ -175,8 +185,9 @@ src/
     registry.cr       # Registration logic
     artifact.cr       # Artifact CRUD, COW, queries
     link.cr           # Cross-references
+    tag.cr            # Tags (normalized two-table)
 spec/
-  artistry_spec.cr    # 45 specs covering all features
+  artistry_spec.cr    # 64 specs covering all features
 ```
 
 ## Testing

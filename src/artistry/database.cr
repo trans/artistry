@@ -49,6 +49,19 @@ module Artistry
         created_at INTEGER NOT NULL DEFAULT (cast((julianday('now') - 2440587.5) * 86400000 as integer)),
         PRIMARY KEY (from_id, to_id, rel)
       );
+
+      CREATE TABLE IF NOT EXISTS tag (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        created_at INTEGER NOT NULL DEFAULT (cast((julianday('now') - 2440587.5) * 86400000 as integer))
+      );
+
+      CREATE TABLE IF NOT EXISTS tagging (
+        tag_id INTEGER NOT NULL REFERENCES tag(id) ON DELETE CASCADE,
+        artifact_id INTEGER NOT NULL REFERENCES identity(id) ON DELETE CASCADE,
+        created_at INTEGER NOT NULL DEFAULT (cast((julianday('now') - 2440587.5) * 86400000 as integer)),
+        PRIMARY KEY (tag_id, artifact_id)
+      );
     SQL
 
     def self.ensure_schema(db : DB::Database) : Nil

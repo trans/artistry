@@ -4,9 +4,10 @@ require "./artistry/validator"
 require "./artistry/registry"
 require "./artistry/artifact"
 require "./artistry/link"
+require "./artistry/tag"
 
 module Artistry
-  VERSION = "0.6.0"
+  VERSION = "0.7.0"
 
   class_property db_path : String = "artistry.db"
   class_getter! db : DB::Database

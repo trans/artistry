@@ -447,4 +447,161 @@ describe Artistry do
       end
     end
   end
+
+  describe Artistry::Tag do
+    before_each do
+      Artistry::Registry.register(kind: "event", plugin: "memo", schema: {title: "string"})
+    end
+
+    it "creates a tag" do
+      tag = Artistry::Tag.create("security")
+      tag.name.should eq("security")
+      tag.id.should be > 0
+    end
+
+    it "find-or-creates on duplicate name" do
+      t1 = Artistry::Tag.create("security")
+      t2 = Artistry::Tag.create("security")
+      t1.id.should eq(t2.id)
+    end
+
+    it "finds by id" do
+      tag = Artistry::Tag.create("security")
+      found = Artistry::Tag.find(tag.id)
+      found.should_not be_nil
+      found.not_nil!.name.should eq("security")
+    end
+
+    it "finds by name" do
+      Artistry::Tag.create("security")
+      found = Artistry::Tag.find("security")
+      found.should_not be_nil
+      found.not_nil!.name.should eq("security")
+    end
+
+    it "returns nil for missing tag" do
+      Artistry::Tag.find("nonexistent").should be_nil
+    end
+
+    it "lists all tags" do
+      Artistry::Tag.create("beta")
+      Artistry::Tag.create("alpha")
+      tags = Artistry::Tag.all
+      tags.size.should eq(2)
+      tags[0].name.should eq("alpha")
+      tags[1].name.should eq("beta")
+    end
+
+    it "deletes a tag" do
+      tag = Artistry::Tag.create("temporary")
+      tag.delete
+      Artistry::Tag.find("temporary").should be_nil
+    end
+
+    it "tags an artifact" do
+      artifact = Artistry::Artifact.create("event", {title: "Meeting"})
+      Artistry::Tag.tag(artifact, "important")
+      tags = Artistry::Tag.for(artifact)
+      tags.size.should eq(1)
+      tags[0].name.should eq("important")
+    end
+
+    it "ignores duplicate tagging" do
+      artifact = Artistry::Artifact.create("event", {title: "Meeting"})
+      Artistry::Tag.tag(artifact, "important")
+      Artistry::Tag.tag(artifact, "important")
+      tags = Artistry::Tag.for(artifact)
+      tags.size.should eq(1)
+    end
+
+    it "untags an artifact" do
+      artifact = Artistry::Artifact.create("event", {title: "Meeting"})
+      Artistry::Tag.tag(artifact, "important")
+      Artistry::Tag.untag(artifact, "important")
+      Artistry::Tag.for(artifact).size.should eq(0)
+    end
+
+    it "syncs tags for an artifact" do
+      artifact = Artistry::Artifact.create("event", {title: "Meeting"})
+      Artistry::Tag.tag(artifact, "old")
+      Artistry::Tag.tag(artifact, "stale")
+
+      Artistry::Tag.sync(artifact, ["fresh", "new"])
+      tags = Artistry::Tag.for(artifact)
+      tags.size.should eq(2)
+      tags.map(&.name).should contain("fresh")
+      tags.map(&.name).should contain("new")
+      tags.map(&.name).should_not contain("old")
+    end
+
+    it "finds artifacts by tag name" do
+      e1 = Artistry::Artifact.create("event", {title: "Meeting"})
+      e2 = Artistry::Artifact.create("event", {title: "Lunch"})
+      Artistry::Tag.tag(e1, "important")
+      Artistry::Tag.tag(e2, "casual")
+
+      results = Artistry::Tag.artifacts("important")
+      results.size.should eq(1)
+      results[0].id.should eq(e1.id)
+    end
+
+    it "excludes superseded artifacts from tag queries" do
+      e1 = Artistry::Artifact.create("event", {title: "Draft"})
+      Artistry::Tag.tag(e1, "wip")
+      e1.update({title: "Final"})
+
+      results = Artistry::Tag.artifacts("wip")
+      results.size.should eq(0)
+    end
+
+    it "finds artifacts with ANY of the given tags" do
+      e1 = Artistry::Artifact.create("event", {title: "Meeting"})
+      e2 = Artistry::Artifact.create("event", {title: "Lunch"})
+      e3 = Artistry::Artifact.create("event", {title: "Walk"})
+      Artistry::Tag.tag(e1, "important")
+      Artistry::Tag.tag(e2, "casual")
+      Artistry::Tag.tag(e3, "exercise")
+
+      results = Artistry::Tag.artifacts_any(["important", "casual"])
+      results.size.should eq(2)
+      results.map(&.id).should contain(e1.id)
+      results.map(&.id).should contain(e2.id)
+    end
+
+    it "finds artifacts with ALL of the given tags" do
+      e1 = Artistry::Artifact.create("event", {title: "Meeting"})
+      e2 = Artistry::Artifact.create("event", {title: "Lunch"})
+      Artistry::Tag.tag(e1, "important")
+      Artistry::Tag.tag(e1, "urgent")
+      Artistry::Tag.tag(e2, "important")
+
+      results = Artistry::Tag.artifacts_all(["important", "urgent"])
+      results.size.should eq(1)
+      results[0].id.should eq(e1.id)
+    end
+
+    it "returns empty for artifacts_any with empty list" do
+      Artistry::Tag.artifacts_any([] of String).size.should eq(0)
+    end
+
+    it "returns empty for artifacts_all with empty list" do
+      Artistry::Tag.artifacts_all([] of String).size.should eq(0)
+    end
+
+    it "cascade deletes taggings when tag is deleted" do
+      artifact = Artistry::Artifact.create("event", {title: "Meeting"})
+      Artistry::Tag.tag(artifact, "temporary")
+      tag = Artistry::Tag.find("temporary").not_nil!
+      tag.delete
+      Artistry::Tag.for(artifact).size.should eq(0)
+    end
+
+    it "cascade deletes taggings when artifact is deleted" do
+      artifact = Artistry::Artifact.create("event", {title: "Meeting"})
+      Artistry::Tag.tag(artifact, "important")
+      artifact.delete
+      # Tag still exists, but no artifacts linked
+      Artistry::Tag.artifacts("important").size.should eq(0)
+    end
+  end
 end

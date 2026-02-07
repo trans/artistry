@@ -155,6 +155,34 @@ link.to   # => the person artifact
 link.rel  # => "attendee"
 ```
 
+### Tags
+
+Tags are normalized — each unique tag string is stored once, then linked to artifacts via a junction table.
+
+```crystal
+# Tag an artifact
+Artistry::Tag.tag(event, "security")
+Artistry::Tag.tag(event, "mvp")
+
+# Get tags for an artifact
+Artistry::Tag.for(event)  # => [Tag("mvp"), Tag("security")]
+
+# Find artifacts by tag
+Artistry::Tag.artifacts("security")
+
+# OR query - artifacts with any of the tags
+Artistry::Tag.artifacts_any(["security", "mvp"])
+
+# AND query - artifacts with all of the tags
+Artistry::Tag.artifacts_all(["security", "mvp"])
+
+# Replace all tags at once
+Artistry::Tag.sync(event, ["v2", "released"])
+
+# Remove a tag
+Artistry::Tag.untag(event, "mvp")
+```
+
 ### Versioning Queries
 
 ```crystal
@@ -174,11 +202,13 @@ Artistry::Artifact.where("E", include_superseded: true)
 | `schema` | Versioned schemas with JSON and hash |
 | `artifact` | All artifacts (JSON payload, COW tracking via `new_id`) |
 | `link` | Cross-artifact references (`from_id`, `to_id`, `rel`, `data`) - CASCADE delete |
+| `tag` | Unique tag names (`id`, `name`) |
+| `tagging` | Junction table linking tags to artifacts - CASCADE delete both directions |
 
 ## Technical Notes
 
 - **Timestamps**: All `created_at`/`updated_at` fields are unix epoch milliseconds (Int64). Convert with `Time.unix_ms(ts)` in Crystal.
-- **Foreign Keys**: FK constraints are enforced. Link FKs use `ON DELETE CASCADE` - deleting an artifact removes its links.
+- **Foreign Keys**: FK constraints are enforced. Link and tagging FKs use `ON DELETE CASCADE` - deleting an artifact removes its links and taggings; deleting a tag removes its taggings.
 
 ## License
 
