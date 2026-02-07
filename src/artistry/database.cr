@@ -62,6 +62,8 @@ module Artistry
         created_at INTEGER NOT NULL DEFAULT (cast((julianday('now') - 2440587.5) * 86400000 as integer)),
         PRIMARY KEY (tag_id, artifact_id)
       );
+
+      CREATE INDEX IF NOT EXISTS idx_tagging_artifact_id ON tagging(artifact_id);
     SQL
 
     def self.ensure_schema(db : DB::Database) : Nil

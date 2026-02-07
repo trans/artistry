@@ -7,7 +7,7 @@ require "./artistry/link"
 require "./artistry/tag"
 
 module Artistry
-  VERSION = "0.7.0"
+  VERSION = "0.7.1"
 
   class_property db_path : String = "artistry.db"
   class_getter! db : DB::Database
