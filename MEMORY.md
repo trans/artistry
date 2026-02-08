@@ -95,7 +95,7 @@ Artistry::Artifact.create("task", data, strict: false)
 - `include_superseded: true` option for queries
 - Links between artifacts with optional data payload
 - Tags with normalized two-table design (tag + tagging junction)
-- Transactions via `Artistry.transaction { }` (auto-commit/rollback)
+- Transactions via `Artistry.transaction { |art| }` with context object (fiber-safe)
 
 ## TODO: Optional Fields & Defaults
 
@@ -128,7 +128,14 @@ Normalized two-table design:
 
 ## Transactions (Implemented)
 
-`Artistry.transaction { }` wraps operations atomically. Internally uses `@@tx_connection` to pin all operations to a single DB connection during the transaction. All internal code uses `Artistry.conn` (returns tx connection or pool). Auto-commits on success, auto-rollbacks on exception. `DB::Rollback` for silent rollback.
+`Artistry.transaction` yields a `Transaction` context object with delegated API shortcuts:
+`art.create`, `art.find`, `art.where`, `art.tag`, `art.untag`, `art.sync_tags`, `art.tags_for`,
+`art.link`, `art.unlink`, `art.links_from`, `art.links_to`, `art.rollback`, `art.commit`.
+
+Internally uses a fiber-keyed hash (`@@tx_connections`) to pin each fiber's operations to a single
+DB connection. All internal code uses `Artistry.conn` (returns tx connection or pool). Class methods
+also work inside the block and participate in the same transaction. Auto-commits on success,
+auto-rollbacks on exception. `DB::Rollback` for silent rollback.
 
 ## What's NOT Implemented
 
@@ -178,8 +185,12 @@ Artistry::Tag.artifacts_any(["security", "mvp"])
 Artistry::Tag.artifacts_all(["security", "mvp"])
 
 # Transactions
-Artistry.transaction do
-  # all operations here are atomic
+Artistry.transaction do |art|
+  event = art.create("event", {title: "Meeting"})
+  person = art.create("person", {name: "Alice"})
+  art.link(event, person, "organizer")
+  art.tag(event, "important")
+  art.rollback if some_condition
 end
 ```
 
@@ -195,8 +206,9 @@ src/
     artifact.cr       # Artifact CRUD, COW, queries
     link.cr           # Cross-references
     tag.cr            # Tags (normalized two-table)
+    transaction.cr    # Transaction context (delegation)
 spec/
-  artistry_spec.cr    # 69 specs covering all features
+  artistry_spec.cr    # 73 specs covering all features
 ```
 
 ## Testing
