@@ -185,19 +185,21 @@ Artistry::Tag.untag(event, "mvp")
 
 ### Transactions
 
-Wrap multiple operations in a transaction for atomicity:
+Wrap multiple operations in a transaction for atomicity. The block yields a transaction context with convenient shortcuts:
 
 ```crystal
-Artistry.transaction do
-  event = Artistry::Artifact.create("event", {title: "Meeting"})
-  person = Artistry::Artifact.create("person", {name: "Alice"})
-  Artistry::Link.create(event, person, "organizer")
-  Artistry::Tag.tag(event, "important")
+Artistry.transaction do |art|
+  event = art.create("event", {title: "Meeting"})
+  person = art.create("person", {name: "Alice"})
+  art.link(event, person, "organizer")
+  art.tag(event, "important")
 end
 # Auto-commits on success, auto-rollbacks on exception
 ```
 
-Raise `DB::Rollback` inside the block for a silent rollback (no exception propagated).
+The transaction context provides: `create`, `find`, `where`, `tag`, `untag`, `sync_tags`, `tags_for`, `link`, `unlink`, `links_from`, `links_to`, `rollback`, `commit`.
+
+Call `art.rollback` for explicit rollback, or raise `DB::Rollback` for a silent rollback (no exception propagated). Class methods (`Artistry::Artifact.create`, etc.) also work inside the block and participate in the same transaction.
 
 ### Versioning Queries
 

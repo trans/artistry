@@ -5,9 +5,10 @@ require "./artistry/registry"
 require "./artistry/artifact"
 require "./artistry/link"
 require "./artistry/tag"
+require "./artistry/transaction"
 
 module Artistry
-  VERSION = "0.8.0"
+  VERSION = "0.8.1"
 
   class_property db_path : String = "artistry.db"
   class_getter! db : DB::Database
@@ -43,7 +44,7 @@ module Artistry
     db.using_connection do |conn|
       @@tx_connections[Fiber.current] = conn
       conn.transaction do |tx|
-        yield tx
+        yield Transaction.new(tx)
       end
     end
   ensure

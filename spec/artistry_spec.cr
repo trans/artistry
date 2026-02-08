@@ -612,16 +612,16 @@ describe Artistry do
     end
 
     it "commits on success" do
-      Artistry.transaction do
-        Artistry::Artifact.create("event", {title: "Meeting"})
+      Artistry.transaction do |art|
+        art.create("event", {title: "Meeting"})
       end
       Artistry::Artifact.where("E").size.should eq(1)
     end
 
     it "rolls back on exception" do
       expect_raises(Exception, /boom/) do
-        Artistry.transaction do
-          Artistry::Artifact.create("event", {title: "Meeting"})
+        Artistry.transaction do |art|
+          art.create("event", {title: "Meeting"})
           raise "boom"
         end
       end
@@ -629,8 +629,8 @@ describe Artistry do
     end
 
     it "rolls back silently on DB::Rollback" do
-      Artistry.transaction do
-        Artistry::Artifact.create("event", {title: "Meeting"})
+      Artistry.transaction do |art|
+        art.create("event", {title: "Meeting"})
         raise DB::Rollback.new
       end
       Artistry::Artifact.where("E").size.should eq(0)
@@ -638,11 +638,11 @@ describe Artistry do
 
     it "commits multiple operations atomically" do
       event = nil
-      Artistry.transaction do
-        event = Artistry::Artifact.create("event", {title: "Meeting"})
-        person = Artistry::Artifact.create("person", {name: "Alice"})
-        Artistry::Link.create(event.not_nil!, person, "organizer")
-        Artistry::Tag.tag(event.not_nil!, "important")
+      Artistry.transaction do |art|
+        event = art.create("event", {title: "Meeting"})
+        person = art.create("person", {name: "Alice"})
+        art.link(event.not_nil!, person, "organizer")
+        art.tag(event.not_nil!, "important")
       end
       Artistry::Artifact.where("E").size.should eq(1)
       Artistry::Artifact.where("P").size.should eq(1)
@@ -653,16 +653,55 @@ describe Artistry do
     it "rolls back all operations on failure" do
       person = Artistry::Artifact.create("person", {name: "Alice"})
       expect_raises(Exception, /boom/) do
-        Artistry.transaction do
-          event = Artistry::Artifact.create("event", {title: "Meeting"})
-          Artistry::Tag.tag(event, "important")
-          Artistry::Link.create(event, person, "organizer")
+        Artistry.transaction do |art|
+          event = art.create("event", {title: "Meeting"})
+          art.tag(event, "important")
+          art.link(event, person, "organizer")
           raise "boom"
         end
       end
       Artistry::Artifact.where("E").size.should eq(0)
       Artistry::Tag.artifacts("important").size.should eq(0)
       Artistry::Link.from(person).size.should eq(0)
+    end
+
+    it "supports explicit rollback" do
+      Artistry.transaction do |art|
+        art.create("event", {title: "Meeting"})
+        art.rollback
+      end
+      Artistry::Artifact.where("E").size.should eq(0)
+    end
+
+    it "delegates find and where" do
+      Artistry.transaction do |art|
+        event = art.create("event", {title: "Meeting"})
+        art.find(event.id).should_not be_nil
+        art.find(event.slug).should_not be_nil
+        art.where("E").size.should eq(1)
+      end
+    end
+
+    it "delegates tag queries" do
+      Artistry.transaction do |art|
+        event = art.create("event", {title: "Meeting"})
+        art.tag(event, "important")
+        art.tags_for(event).size.should eq(1)
+        art.untag(event, "important")
+        art.tags_for(event).size.should eq(0)
+      end
+    end
+
+    it "delegates link queries" do
+      Artistry.transaction do |art|
+        event = art.create("event", {title: "Meeting"})
+        person = art.create("person", {name: "Alice"})
+        art.link(event, person, "organizer")
+        art.links_from(event, "organizer").size.should eq(1)
+        art.links_to(person, "organizer").size.should eq(1)
+        art.unlink(event, person, "organizer")
+        art.links_from(event, "organizer").size.should eq(0)
+      end
     end
   end
 end
