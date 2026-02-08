@@ -26,7 +26,7 @@ module Artistry
 
     # Create a new artifact (internal - by registry)
     private def self.create_with_registry(reg : Registry, data, strict : Bool = true) : Artifact
-      db = Artistry.db
+      db = Artistry.conn
 
       # Convert to JSON for validation and storage
       data_json = data.to_json
@@ -93,7 +93,7 @@ module Artistry
 
     # Find by ID
     def self.find(id : Int64) : Artifact?
-      row = Artistry.db.query_one?(
+      row = Artistry.conn.query_one?(
         "SELECT a.id, a.code, a.version, a.data, a.hash, i.created_at,
                 a.new_id, a.updated_at
          FROM artifact a
@@ -138,7 +138,7 @@ module Artistry
                ORDER BY a.id"
             end
 
-      Artistry.db.query(sql, code) do |rs|
+      Artistry.conn.query(sql, code) do |rs|
         rs.each do
           results << Artifact.new(
             rs.read(Int64),
@@ -178,7 +178,7 @@ module Artistry
       SQL
 
       results = [] of Artifact
-      Artistry.db.query(sql, args: params) do |rs|
+      Artistry.conn.query(sql, args: params) do |rs|
         rs.each do
           results << Artifact.new(
             rs.read(Int64),
@@ -234,7 +234,7 @@ module Artistry
       root = self
       loop do
         # Find what superseded by this one
-        prev = Artistry.db.query_one?(
+        prev = Artistry.conn.query_one?(
           "SELECT id FROM artifact WHERE new_id = ?",
           root.id,
           as: Int64
@@ -270,7 +270,7 @@ module Artistry
     def update(new_data, strict : Bool = true) : Artifact
       raise "Cannot update superseded artifact (use .latest.update)" if superseded?
 
-      db = Artistry.db
+      db = Artistry.conn
 
       # Get current schema version for this code
       current_version = db.query_one?(
@@ -321,7 +321,7 @@ module Artistry
 
     # Mutable update - modifies in place, sets updated_at
     def update!(new_data, strict : Bool = true) : Artifact
-      db = Artistry.db
+      db = Artistry.conn
 
       # Get current schema version for this code
       current_version = db.query_one?(
@@ -357,7 +357,7 @@ module Artistry
 
     # Delete artifact (hard delete)
     def delete : Nil
-      db = Artistry.db
+      db = Artistry.conn
       db.exec("DELETE FROM artifact WHERE id = ?", id)
       db.exec("DELETE FROM identity WHERE id = ?", id)
     end

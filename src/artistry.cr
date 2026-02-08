@@ -7,7 +7,7 @@ require "./artistry/link"
 require "./artistry/tag"
 
 module Artistry
-  VERSION = "0.7.1"
+  VERSION = "0.8.0"
 
   class_property db_path : String = "artistry.db"
   class_getter! db : DB::Database
@@ -21,7 +21,7 @@ module Artistry
     db
   end
 
-  def self.open(path : String = db_path, &) : Nil
+  def self.open(path : String = db_path, &block) : Nil
     open(path)
     yield db
   ensure
@@ -31,5 +31,22 @@ module Artistry
   def self.close : Nil
     @@db.try &.close
     @@db = nil
+  end
+
+  @@tx_connections = {} of Fiber => DB::Connection
+
+  def self.conn
+    @@tx_connections[Fiber.current]? || db
+  end
+
+  def self.transaction(&block)
+    db.using_connection do |conn|
+      @@tx_connections[Fiber.current] = conn
+      conn.transaction do |tx|
+        yield tx
+      end
+    end
+  ensure
+    @@tx_connections.delete(Fiber.current)
   end
 end

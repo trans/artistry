@@ -24,7 +24,7 @@ module Artistry
       symbol : String? = nil,
       index : Array(String) = [] of String
     ) : String
-      db = Artistry.db
+      db = Artistry.conn
       kind = kind.downcase
       plugin = plugin.downcase
 
@@ -89,7 +89,7 @@ module Artistry
     end
 
     # Create expression indexes on JSON fields for a kind
-    private def self.create_indexes(db : DB::Database, plugin : String, kind : String, code : String, fields : Array(String)) : Nil
+    private def self.create_indexes(db, plugin : String, kind : String, code : String, fields : Array(String)) : Nil
       fields.each do |field|
         index_name = "idx_#{plugin}_#{kind}_#{field}"
         # CREATE INDEX IF NOT EXISTS is idempotent
@@ -100,7 +100,7 @@ module Artistry
     end
 
     # Find the shortest unique prefix for a kind name
-    def self.allocate_code(db : DB::Database, kind : String) : String
+    def self.allocate_code(db, kind : String) : String
       kind_upper = kind.upcase
 
       (1..kind_upper.size).each do |len|
@@ -137,7 +137,7 @@ module Artistry
 
     # Lookup a registration by code
     def self.find(code : String) : Registry?
-      row = Artistry.db.query_one?(
+      row = Artistry.conn.query_one?(
         "SELECT code, kind, plugin, description, symbol, version FROM registry WHERE code = ?",
         code,
         as: {String, String, String, String?, String?, Int32}
@@ -148,7 +148,7 @@ module Artistry
 
     # Lookup a registration by plugin and kind
     def self.find(plugin : String, kind : String) : Registry?
-      row = Artistry.db.query_one?(
+      row = Artistry.conn.query_one?(
         "SELECT code, kind, plugin, description, symbol, version FROM registry WHERE plugin = ? AND kind = ?",
         plugin.downcase, kind.downcase,
         as: {String, String, String, String?, String?, Int32}
@@ -159,7 +159,7 @@ module Artistry
 
     # Lookup a registration by kind name only (returns first match if multiple plugins use same kind)
     def self.find_by_kind(kind : String) : Registry?
-      row = Artistry.db.query_one?(
+      row = Artistry.conn.query_one?(
         "SELECT code, kind, plugin, description, symbol, version FROM registry WHERE kind = ? LIMIT 1",
         kind.downcase,
         as: {String, String, String, String?, String?, Int32}
@@ -170,7 +170,7 @@ module Artistry
 
     # Get the schema JSON for a code and version
     def self.get_schema(code : String, version : Int32) : JSON::Any?
-      json = Artistry.db.query_one?(
+      json = Artistry.conn.query_one?(
         "SELECT json FROM schema WHERE code = ? AND version = ?",
         code, version,
         as: String
@@ -181,7 +181,7 @@ module Artistry
     # List all registrations
     def self.all : Array(Registry)
       results = [] of Registry
-      Artistry.db.query(
+      Artistry.conn.query(
         "SELECT code, kind, plugin, description, symbol, version FROM registry ORDER BY code"
       ) do |rs|
         rs.each do

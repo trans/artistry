@@ -9,14 +9,14 @@ module Artistry
 
     # Find or create a tag by name.
     def self.create(name : String) : Tag
-      db = Artistry.db
+      db = Artistry.conn
       db.exec("INSERT OR IGNORE INTO tag (name) VALUES (?)", name)
       find(name).not_nil!
     end
 
     # Find tag by ID.
     def self.find(id : Int64) : Tag?
-      row = Artistry.db.query_one?(
+      row = Artistry.conn.query_one?(
         "SELECT id, name, created_at FROM tag WHERE id = ?",
         id,
         as: {Int64, String, Int64}
@@ -27,7 +27,7 @@ module Artistry
 
     # Find tag by name.
     def self.find(name : String) : Tag?
-      row = Artistry.db.query_one?(
+      row = Artistry.conn.query_one?(
         "SELECT id, name, created_at FROM tag WHERE name = ?",
         name,
         as: {Int64, String, Int64}
@@ -39,7 +39,7 @@ module Artistry
     # Get all tags, ordered by name.
     def self.all : Array(Tag)
       results = [] of Tag
-      Artistry.db.query("SELECT id, name, created_at FROM tag ORDER BY name") do |rs|
+      Artistry.conn.query("SELECT id, name, created_at FROM tag ORDER BY name") do |rs|
         rs.each do
           results << Tag.new(rs.read(Int64), rs.read(String), rs.read(Int64))
         end
@@ -49,14 +49,14 @@ module Artistry
 
     # Delete this tag (CASCADE removes all taggings).
     def delete : Nil
-      Artistry.db.exec("DELETE FROM tag WHERE id = ?", id)
+      Artistry.conn.exec("DELETE FROM tag WHERE id = ?", id)
     end
 
     # Tag an artifact. Creates the tag if it doesn't exist.
     def self.tag(artifact : Artifact | Int64, name : String) : Nil
       tag = create(name)
       artifact_id = artifact.is_a?(Artifact) ? artifact.id : artifact
-      Artistry.db.exec(
+      Artistry.conn.exec(
         "INSERT OR IGNORE INTO tagging (tag_id, artifact_id) VALUES (?, ?)",
         tag.id, artifact_id
       )
@@ -67,7 +67,7 @@ module Artistry
       tag = find(name)
       return unless tag
       artifact_id = artifact.is_a?(Artifact) ? artifact.id : artifact
-      Artistry.db.exec(
+      Artistry.conn.exec(
         "DELETE FROM tagging WHERE tag_id = ? AND artifact_id = ?",
         tag.id, artifact_id
       )
@@ -76,7 +76,7 @@ module Artistry
     # Replace all tags on an artifact with the given set.
     def self.sync(artifact : Artifact | Int64, names : Array(String)) : Nil
       artifact_id = artifact.is_a?(Artifact) ? artifact.id : artifact
-      Artistry.db.exec("DELETE FROM tagging WHERE artifact_id = ?", artifact_id)
+      Artistry.conn.exec("DELETE FROM tagging WHERE artifact_id = ?", artifact_id)
       names.each do |name|
         tag(artifact_id, name)
       end
@@ -86,7 +86,7 @@ module Artistry
     def self.for(artifact : Artifact | Int64) : Array(Tag)
       artifact_id = artifact.is_a?(Artifact) ? artifact.id : artifact
       results = [] of Tag
-      Artistry.db.query(
+      Artistry.conn.query(
         "SELECT t.id, t.name, t.created_at FROM tag t
          JOIN tagging tg ON t.id = tg.tag_id
          WHERE tg.artifact_id = ?
@@ -110,7 +110,7 @@ module Artistry
     # Get all current artifacts with a given tag.
     def self.artifacts(tag : Tag) : Array(Artifact)
       results = [] of Artifact
-      Artistry.db.query(
+      Artistry.conn.query(
         "SELECT a.id, a.code, a.version, a.data, a.hash, i.created_at,
                 a.new_id, a.updated_at
          FROM artifact a
@@ -136,7 +136,7 @@ module Artistry
       return [] of Artifact if names.empty?
       placeholders = names.map { "?" }.join(", ")
       results = [] of Artifact
-      Artistry.db.query(
+      Artistry.conn.query(
         "SELECT DISTINCT a.id, a.code, a.version, a.data, a.hash, i.created_at,
                 a.new_id, a.updated_at
          FROM artifact a
@@ -163,7 +163,7 @@ module Artistry
       return [] of Artifact if names.empty?
       placeholders = names.map { "?" }.join(", ")
       results = [] of Artifact
-      Artistry.db.query(
+      Artistry.conn.query(
         "SELECT a.id, a.code, a.version, a.data, a.hash, i.created_at,
                 a.new_id, a.updated_at
          FROM artifact a

@@ -604,4 +604,65 @@ describe Artistry do
       Artistry::Tag.artifacts("important").size.should eq(0)
     end
   end
+
+  describe "Artistry.transaction" do
+    before_each do
+      Artistry::Registry.register(kind: "event", plugin: "memo", schema: {title: "string"})
+      Artistry::Registry.register(kind: "person", plugin: "memo", schema: {name: "string"})
+    end
+
+    it "commits on success" do
+      Artistry.transaction do
+        Artistry::Artifact.create("event", {title: "Meeting"})
+      end
+      Artistry::Artifact.where("E").size.should eq(1)
+    end
+
+    it "rolls back on exception" do
+      expect_raises(Exception, /boom/) do
+        Artistry.transaction do
+          Artistry::Artifact.create("event", {title: "Meeting"})
+          raise "boom"
+        end
+      end
+      Artistry::Artifact.where("E").size.should eq(0)
+    end
+
+    it "rolls back silently on DB::Rollback" do
+      Artistry.transaction do
+        Artistry::Artifact.create("event", {title: "Meeting"})
+        raise DB::Rollback.new
+      end
+      Artistry::Artifact.where("E").size.should eq(0)
+    end
+
+    it "commits multiple operations atomically" do
+      event = nil
+      Artistry.transaction do
+        event = Artistry::Artifact.create("event", {title: "Meeting"})
+        person = Artistry::Artifact.create("person", {name: "Alice"})
+        Artistry::Link.create(event.not_nil!, person, "organizer")
+        Artistry::Tag.tag(event.not_nil!, "important")
+      end
+      Artistry::Artifact.where("E").size.should eq(1)
+      Artistry::Artifact.where("P").size.should eq(1)
+      Artistry::Link.from(event.not_nil!, "organizer").size.should eq(1)
+      Artistry::Tag.for(event.not_nil!).size.should eq(1)
+    end
+
+    it "rolls back all operations on failure" do
+      person = Artistry::Artifact.create("person", {name: "Alice"})
+      expect_raises(Exception, /boom/) do
+        Artistry.transaction do
+          event = Artistry::Artifact.create("event", {title: "Meeting"})
+          Artistry::Tag.tag(event, "important")
+          Artistry::Link.create(event, person, "organizer")
+          raise "boom"
+        end
+      end
+      Artistry::Artifact.where("E").size.should eq(0)
+      Artistry::Tag.artifacts("important").size.should eq(0)
+      Artistry::Link.from(person).size.should eq(0)
+    end
+  end
 end

@@ -18,12 +18,12 @@ module Artistry
 
       data_json = data ? data.to_json : nil
 
-      Artistry.db.exec(
+      Artistry.conn.exec(
         "INSERT INTO link (from_id, to_id, rel, data) VALUES (?, ?, ?, ?)",
         from_id, to_id, rel, data_json
       )
 
-      created_at = Artistry.db.query_one(
+      created_at = Artistry.conn.query_one(
         "SELECT created_at FROM link WHERE from_id = ? AND to_id = ? AND rel = ?",
         from_id, to_id, rel,
         as: Int64
@@ -43,7 +43,7 @@ module Artistry
 
     # Find a specific link
     def self.find(from_id : Int64, to_id : Int64, rel : String) : Link?
-      row = Artistry.db.query_one?(
+      row = Artistry.conn.query_one?(
         "SELECT from_id, to_id, rel, data, created_at FROM link
          WHERE from_id = ? AND to_id = ? AND rel = ?",
         from_id, to_id, rel,
@@ -69,7 +69,7 @@ module Artistry
 
       args = rel ? [id, rel] : [id]
 
-      Artistry.db.query(sql, args: args.map(&.as(DB::Any))) do |rs|
+      Artistry.conn.query(sql, args: args.map(&.as(DB::Any))) do |rs|
         rs.each do
           from = rs.read(Int64)
           to = rs.read(Int64)
@@ -97,7 +97,7 @@ module Artistry
 
       args = rel ? [id, rel] : [id]
 
-      Artistry.db.query(sql, args: args.map(&.as(DB::Any))) do |rs|
+      Artistry.conn.query(sql, args: args.map(&.as(DB::Any))) do |rs|
         rs.each do
           from = rs.read(Int64)
           to = rs.read(Int64)
@@ -122,7 +122,7 @@ module Artistry
 
     # Delete this link
     def delete : Nil
-      Artistry.db.exec(
+      Artistry.conn.exec(
         "DELETE FROM link WHERE from_id = ? AND to_id = ? AND rel = ?",
         from_id, to_id, rel
       )
@@ -131,7 +131,7 @@ module Artistry
     # Delete all links of a rel from an artifact
     def self.delete_from(artifact : Artifact | Int64, rel : String) : Nil
       id = artifact.is_a?(Artifact) ? artifact.id : artifact
-      Artistry.db.exec(
+      Artistry.conn.exec(
         "DELETE FROM link WHERE from_id = ? AND rel = ?",
         id, rel
       )
@@ -140,7 +140,7 @@ module Artistry
     # Delete all links of a rel to an artifact
     def self.delete_to(artifact : Artifact | Int64, rel : String) : Nil
       id = artifact.is_a?(Artifact) ? artifact.id : artifact
-      Artistry.db.exec(
+      Artistry.conn.exec(
         "DELETE FROM link WHERE to_id = ? AND rel = ?",
         id, rel
       )

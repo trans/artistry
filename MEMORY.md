@@ -95,6 +95,7 @@ Artistry::Artifact.create("task", data, strict: false)
 - `include_superseded: true` option for queries
 - Links between artifacts with optional data payload
 - Tags with normalized two-table design (tag + tagging junction)
+- Transactions via `Artistry.transaction { }` (auto-commit/rollback)
 
 ## TODO: Optional Fields & Defaults
 
@@ -125,13 +126,16 @@ Normalized two-table design:
 - No namespaces (flat names, convention-based if needed)
 - `Tag.tag/untag/sync` for tagging, `Tag.for/artifacts/artifacts_any/artifacts_all` for queries
 
+## Transactions (Implemented)
+
+`Artistry.transaction { }` wraps operations atomically. Internally uses `@@tx_connection` to pin all operations to a single DB connection during the transaction. All internal code uses `Artistry.conn` (returns tx connection or pool). Auto-commits on success, auto-rollbacks on exception. `DB::Rollback` for silent rollback.
+
 ## What's NOT Implemented
 
 - Optional fields in schemas (all fields required)
 - Default values for schema fields
 - Richer query operators (like, gt, lt, etc.)
 - Full-text search (FTS5)
-- Transactions wrapper
 - Migration tooling for schema changes
 - Soft delete (currently hard delete only)
 
@@ -172,6 +176,11 @@ Artistry::Tag.for(artifact)
 Artistry::Tag.artifacts("security")
 Artistry::Tag.artifacts_any(["security", "mvp"])
 Artistry::Tag.artifacts_all(["security", "mvp"])
+
+# Transactions
+Artistry.transaction do
+  # all operations here are atomic
+end
 ```
 
 ## File Structure
@@ -187,7 +196,7 @@ src/
     link.cr           # Cross-references
     tag.cr            # Tags (normalized two-table)
 spec/
-  artistry_spec.cr    # 64 specs covering all features
+  artistry_spec.cr    # 69 specs covering all features
 ```
 
 ## Testing

@@ -183,6 +183,22 @@ Artistry::Tag.sync(event, ["v2", "released"])
 Artistry::Tag.untag(event, "mvp")
 ```
 
+### Transactions
+
+Wrap multiple operations in a transaction for atomicity:
+
+```crystal
+Artistry.transaction do
+  event = Artistry::Artifact.create("event", {title: "Meeting"})
+  person = Artistry::Artifact.create("person", {name: "Alice"})
+  Artistry::Link.create(event, person, "organizer")
+  Artistry::Tag.tag(event, "important")
+end
+# Auto-commits on success, auto-rollbacks on exception
+```
+
+Raise `DB::Rollback` inside the block for a silent rollback (no exception propagated).
+
 ### Versioning Queries
 
 ```crystal
