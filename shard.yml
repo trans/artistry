@@ -12,4 +12,5 @@ dependencies:
   sqlite3:
     github: crystal-lang/crystal-sqlite3
   jargon:
-    path: ../jargon
+    github: trans/jargon
+    version: "~> 0.16.0"
