@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Artistry is a SQLite-backed Artifact + Registry datastore for shared schemas, versioned records, links, and tags."
+    />
+    <title>Artistry | Artifact + Registry</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <header class="site-header reveal">
+      <div class="brand-block">
+        <h1>Artistry</h1>
+        <p class="brand-kicker">A Unified Canvas for Data</p>
+      </div>
+      <div class="header-tools">
+        <div class="theme-controls" role="group" aria-label="Theme controls">
+          <div class="theme-switcher" role="group" aria-label="Accent colors">
+            <button
+              class="theme-dot is-active"
+              data-hue="red"
+              title="Red"
+              aria-label="Red accent"
+              aria-pressed="true"
+              type="button"
+            ></button>
+            <button
+              class="theme-dot"
+              data-hue="orange"
+              title="Orange"
+              aria-label="Orange accent"
+              aria-pressed="false"
+              type="button"
+            ></button>
+            <button
+              class="theme-dot"
+              data-hue="yellow"
+              title="Yellow"
+              aria-label="Yellow accent"
+              aria-pressed="false"
+              type="button"
+            ></button>
+            <button
+              class="theme-dot"
+              data-hue="green"
+              title="Green"
+              aria-label="Green accent"
+              aria-pressed="false"
+              type="button"
+            ></button>
+            <button
+              class="theme-dot"
+              data-hue="blue"
+              title="Blue"
+              aria-label="Blue accent"
+              aria-pressed="false"
+              type="button"
+            ></button>
+            <button
+              class="theme-dot"
+              data-hue="purple"
+              title="Purple"
+              aria-label="Purple accent"
+              aria-pressed="false"
+              type="button"
+            ></button>
+          </div>
+          <div class="mode-switcher" role="group" aria-label="Color mode">
+            <button
+              class="mode-dot is-active"
+              data-mode="light"
+              title="Light Mode"
+              aria-label="Light mode"
+              aria-pressed="true"
+              type="button"
+            ></button>
+            <button
+              class="mode-dot"
+              data-mode="dark"
+              title="Dark Mode"
+              aria-label="Dark mode"
+              aria-pressed="false"
+              type="button"
+            ></button>
+          </div>
+        </div>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="./api/index.html">
+            <svg
+              class="nav-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <polygon points="12,2 4,8 8,20 16,20 20,8"></polygon>
+              <path d="M12 2 12 20 M4 8 12 12 20 8" fill="none"></path>
+            </svg>
+            API Docs
+          </a>
+          <a href="https://github.com/trans/artistry">
+            <svg
+              class="nav-icon"
+              viewBox="0 0 16 16"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.39v-1.36c-2.23.49-2.7-.95-2.7-.95-.36-.9-.89-1.14-.89-1.14-.73-.5.06-.49.06-.49.81.06 1.23.83 1.23.83.72 1.23 1.89.87 2.35.67.07-.52.28-.87.5-1.08-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.58.82-2.14-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.62 7.62 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.14 0 3.07-1.87 3.75-3.65 3.95.29.25.54.74.54 1.49v2.21c0 .22.15.46.55.39A8 8 0 0 0 8 0Z"
+              ></path>
+            </svg>
+            GitHub
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="hero reveal">
+        <div class="hero-content">
+          <p class="eyebrow">Artifact + Registry</p>
+          <h2>One SQLite datastore where plugins can coexist without collisions.</h2>
+          <p class="hero-copy">
+            Artistry gives every artifact kind a registry-backed identity, stores
+            flexible JSON payloads with schema validation, and keeps immutable
+            version history by default through copy-on-write updates.
+          </p>
+          <ul class="hero-points">
+            <li>Global IDs across all kinds, addressable with short slugs like <code>E42</code>.</li>
+            <li>JSON Schema subset support with defaults, constraints, and optional fields.</li>
+            <li>Typed links, normalized tags, and transaction helpers for atomic workflows.</li>
+          </ul>
+          <div class="hero-actions">
+            <a class="button button-primary" href="./api/index.html">Explore API</a>
+            <a
+              class="button button-secondary"
+              href="https://github.com/trans/artistry#readme"
+              >Read Usage Guide</a
+            >
+          </div>
+        </div>
+        <figure class="hero-palette">
+          <img
+            src="./palette.png"
+            alt="Paint palette illustration used for the Artistry landing page theme."
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+      </section>
+
+      <section class="features reveal" aria-labelledby="features-heading">
+        <div class="section-head">
+          <p class="eyebrow">Core Concepts</p>
+          <h3 id="features-heading">Built for collaborative data systems</h3>
+        </div>
+        <div class="concept-grid">
+          <article class="feature-card">
+            <p class="feature-title">Registry</p>
+            <p>Register kinds with plugin name, schema, and a compact assigned code.</p>
+          </article>
+          <article class="feature-card">
+            <p class="feature-title">Unified Identity</p>
+            <p>Auto-increment IDs are global across all artifacts, not siloed per kind.</p>
+          </article>
+          <article class="feature-card">
+            <p class="feature-title">Versioning</p>
+            <p>Default updates create a new current version while preserving lineage.</p>
+          </article>
+          <article class="feature-card">
+            <p class="feature-title">Validation</p>
+            <p>JSON schema constraints enforce data shape, defaults, and required keys.</p>
+          </article>
+          <article class="feature-card">
+            <p class="feature-title">Links</p>
+            <p>Create typed cross-artifact relations with cascade cleanup semantics.</p>
+          </article>
+          <article class="feature-card">
+            <p class="feature-title">Tags</p>
+            <p>Normalized tags support OR and AND lookup patterns across artifacts.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="workflow reveal" aria-labelledby="workflow-heading">
+        <div class="section-head">
+          <p class="eyebrow">Workflow</p>
+          <h3 id="workflow-heading">From schema registration to atomic updates</h3>
+        </div>
+        <div class="workflow-grid">
+          <article class="step-card">
+            <p class="step-index">01</p>
+            <p class="feature-title">Register</p>
+            <p>Define kind schema, description, and indexes via a unified registry.</p>
+          </article>
+          <article class="step-card">
+            <p class="step-index">02</p>
+            <p class="feature-title">Create + Query</p>
+            <p>Create artifacts then query by ID, slug, kind code, or keyed conditions.</p>
+          </article>
+          <article class="step-card">
+            <p class="step-index">03</p>
+            <p class="feature-title">Connect</p>
+            <p>Attach links with <code>rel</code> types and sync normalized tags per artifact.</p>
+          </article>
+          <article class="step-card">
+            <p class="step-index">04</p>
+            <p class="feature-title">Transact</p>
+            <p>Wrap related changes in <code>Artistry.transaction</code> for commit or rollback.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="quickstart reveal" aria-labelledby="quickstart-heading">
+        <div class="section-head">
+          <p class="eyebrow">Quick Start</p>
+          <h3 id="quickstart-heading">Example registration</h3>
+        </div>
+        <pre><code><span class="tok-kw">require</span> <span class="tok-str">"artistry"</span>
+
+<span class="tok-mod">Artistry</span>.<span class="tok-fn">open</span>(<span class="tok-str">"myapp.db"</span>)
+
+<span class="tok-mod">Artistry</span>::<span class="tok-mod">Registry</span>.<span class="tok-fn">register</span>(
+  <span class="tok-key">kind</span>: <span class="tok-str">"event"</span>,
+  <span class="tok-key">plugin</span>: <span class="tok-str">"myapp"</span>,
+  <span class="tok-key">schema</span>: {
+    <span class="tok-key">type</span>: <span class="tok-str">"object"</span>,
+    <span class="tok-key">properties</span>: {
+      <span class="tok-key">title</span>: {<span class="tok-key">type</span>: <span class="tok-str">"string"</span>, <span class="tok-key">minLength</span>: <span class="tok-num">1</span>},
+      <span class="tok-key">date</span>: {<span class="tok-key">type</span>: <span class="tok-str">"string"</span>, <span class="tok-key">format</span>: <span class="tok-str">"date"</span>},
+    },
+    <span class="tok-key">required</span>: [<span class="tok-str">"title"</span>, <span class="tok-str">"date"</span>],
+    <span class="tok-key">additionalProperties</span>: <span class="tok-bool">false</span>,
+  }
+)
+
+<span class="tok-ident">event</span> = <span class="tok-mod">Artistry</span>::<span class="tok-mod">Artifact</span>.<span class="tok-fn">create</span>(<span class="tok-str">"event"</span>, {<span class="tok-key">title</span>: <span class="tok-str">"Team Meeting"</span>, <span class="tok-key">date</span>: <span class="tok-str">"2025-06-15"</span>})
+<span class="tok-mod">Artistry</span>::<span class="tok-mod">Tag</span>.<span class="tok-fn">tag</span>(<span class="tok-ident">event</span>, <span class="tok-str">"mvp"</span>)</code></pre>
+      </section>
+    </main>
+
+    <footer class="site-footer reveal">
+      <p>Artistry &dot; Copyright 2026 Thomas Sawyer | MIT license</p>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.19.1">
+<meta name="crystal_docs.project_version" content="0.9.0-dev">
+<meta name="crystal_docs.project_name" content="artistry">
+
+
+
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/doc.js"></script>
+
+  <meta name="repository-name" content="artistry">
+  <title>Artistry::Validator - artistry 0.9.0-dev</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../index.html">
+          artistry
+        </a>
+      </h1>
+
+      <span class="project-version">
+        0.9.0-dev
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent open current" data-id="artistry/Artistry" data-name="artistry">
+      <a href="../Artistry.html">Artistry</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/Artifact" data-name="artistry::artifact">
+      <a href="../Artistry/Artifact.html">Artifact</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Database" data-name="artistry::database">
+      <a href="../Artistry/Database.html">Database</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Link" data-name="artistry::link">
+      <a href="../Artistry/Link.html">Link</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Registry" data-name="artistry::registry">
+      <a href="../Artistry/Registry.html">Registry</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Tag" data-name="artistry::tag">
+      <a href="../Artistry/Tag.html">Tag</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Transaction" data-name="artistry::transaction">
+      <a href="../Artistry/Transaction.html">Transaction</a>
+      
+    </li>
+  
+  <li class="parent " data-id="artistry/Artistry/ValidationError" data-name="artistry::validationerror">
+      <a href="../Artistry/ValidationError.html">ValidationError</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/ValidationError/FieldError" data-name="artistry::validationerror::fielderror">
+      <a href="../Artistry/ValidationError/FieldError.html">FieldError</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" current" data-id="artistry/Artistry/Validator" data-name="artistry::validator">
+      <a href="../Artistry/Validator.html">Validator</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">
+    module
+  </span> Artistry::<wbr>Validator
+
+</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      artistry/validator.cr
+    
+    <br/>
+  
+
+
+
+
+
+  
+
+  
+  <h2>
+    <a id="class-method-summary" class="anchor" href="#class-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Class Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#apply_defaults%28data%3AJSON%3A%3AAny%2Cschema%3AJSON%3A%3AAny%29%3AJSON%3A%3AAny-class-method" class="signature"><strong>.apply_defaults</strong>(data : JSON::Any, schema : JSON::Any) : JSON::Any</a>
+        
+          <div class="summary"><p>Apply default values from schema to data.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#validate%28data%3AJSON%3A%3AAny%2Cschema%3AJSON%3A%3AAny%29%3ANil-class-method" class="signature"><strong>.validate</strong>(data : JSON::Any, schema : JSON::Any) : Nil</a>
+        
+          <div class="summary"><p>Validate data against a JSON Schema.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+  
+
+  
+
+
+  <div class="methods-inherited">
+    
+  </div>
+
+  
+
+  
+  <h2>
+    <a id="class-method-detail" class="anchor" href="#class-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Class Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="apply_defaults(data:JSON::Any,schema:JSON::Any):JSON::Any-class-method">
+      <div class="signature">
+        
+        def self.<strong>apply_defaults</strong>(data : JSON::Any, schema : JSON::Any) : JSON::Any
+
+        <a class="method-permalink" href="#apply_defaults%28data%3AJSON%3A%3AAny%2Cschema%3AJSON%3A%3AAny%29%3AJSON%3A%3AAny-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Apply default values from schema to data. Returns new JSON::Any with defaults filled in.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="validate(data:JSON::Any,schema:JSON::Any):Nil-class-method">
+      <div class="signature">
+        
+        def self.<strong>validate</strong>(data : JSON::Any, schema : JSON::Any) : Nil
+
+        <a class="method-permalink" href="#validate%28data%3AJSON%3A%3AAny%2Cschema%3AJSON%3A%3AAny%29%3ANil-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Validate data against a JSON Schema.
+Raises ValidationError if validation fails.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+  
+
+  
+
+
+</div>
+
+</body>
+</html>

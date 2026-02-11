@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.19.1">
+<meta name="crystal_docs.project_version" content="0.9.0-dev">
+<meta name="crystal_docs.project_name" content="artistry">
+
+
+
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/doc.js"></script>
+
+  <meta name="repository-name" content="artistry">
+  <title>Artistry::Transaction - artistry 0.9.0-dev</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../index.html">
+          artistry
+        </a>
+      </h1>
+
+      <span class="project-version">
+        0.9.0-dev
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent open current" data-id="artistry/Artistry" data-name="artistry">
+      <a href="../Artistry.html">Artistry</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/Artifact" data-name="artistry::artifact">
+      <a href="../Artistry/Artifact.html">Artifact</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Database" data-name="artistry::database">
+      <a href="../Artistry/Database.html">Database</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Link" data-name="artistry::link">
+      <a href="../Artistry/Link.html">Link</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Registry" data-name="artistry::registry">
+      <a href="../Artistry/Registry.html">Registry</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Tag" data-name="artistry::tag">
+      <a href="../Artistry/Tag.html">Tag</a>
+      
+    </li>
+  
+  <li class=" current" data-id="artistry/Artistry/Transaction" data-name="artistry::transaction">
+      <a href="../Artistry/Transaction.html">Transaction</a>
+      
+    </li>
+  
+  <li class="parent " data-id="artistry/Artistry/ValidationError" data-name="artistry::validationerror">
+      <a href="../Artistry/ValidationError.html">ValidationError</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/ValidationError/FieldError" data-name="artistry::validationerror::fielderror">
+      <a href="../Artistry/ValidationError/FieldError.html">FieldError</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Validator" data-name="artistry::validator">
+      <a href="../Artistry/Validator.html">Validator</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">
+    class
+  </span> Artistry::<wbr>Transaction
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Artistry/Transaction.html">Artistry::Transaction</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      artistry/transaction.cr
+    
+    <br/>
+  
+
+
+
+
+
+  
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28tx%3ADB%3A%3ATransaction%29-class-method" class="signature"><strong>.new</strong>(tx : DB::Transaction)</a>
+        
+      </li>
+    
+  </ul>
+
+
+  
+
+  
+
+  
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#commit%3ANil-instance-method" class="signature"><strong>#commit</strong> : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#create%28plugin%3AString%2Ckind%3AString%2Cdata%29%3AArtifact-instance-method" class="signature"><strong>#create</strong>(plugin : String, kind : String, data) : Artifact</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#create%28kind_or_code%3AString%2Cdata%29%3AArtifact-instance-method" class="signature"><strong>#create</strong>(kind_or_code : String, data) : Artifact</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#find%28id%3AInt64%29%3AArtifact%7CNil-instance-method" class="signature"><strong>#find</strong>(id : Int64) : Artifact | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#find%28slug%3AString%29%3AArtifact%7CNil-instance-method" class="signature"><strong>#find</strong>(slug : String) : Artifact | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#link%28from%3AArtifact%7CInt64%2Cto%3AArtifact%7CInt64%2Crel%3AString%2Cdata%3Dnil%29%3ALink-instance-method" class="signature"><strong>#link</strong>(from : Artifact | Int64, to : Artifact | Int64, rel : String, data = <span class="n">nil</span>) : Link</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#links_from%28artifact%3AArtifact%7CInt64%2Crel%3AString%7CNil%3Dnil%29%3AArray%28Link%29-instance-method" class="signature"><strong>#links_from</strong>(artifact : Artifact | Int64, rel : String | Nil = <span class="n">nil</span>) : Array(Link)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#links_to%28artifact%3AArtifact%7CInt64%2Crel%3AString%7CNil%3Dnil%29%3AArray%28Link%29-instance-method" class="signature"><strong>#links_to</strong>(artifact : Artifact | Int64, rel : String | Nil = <span class="n">nil</span>) : Array(Link)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#rollback%3ANil-instance-method" class="signature"><strong>#rollback</strong> : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#sync_tags%28artifact%3AArtifact%7CInt64%2Cnames%3AArray%28String%29%29%3ANil-instance-method" class="signature"><strong>#sync_tags</strong>(artifact : Artifact | Int64, names : Array(String)) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tag%28artifact%3AArtifact%7CInt64%2Cname%3AString%29%3ANil-instance-method" class="signature"><strong>#tag</strong>(artifact : Artifact | Int64, name : String) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#tags_for%28artifact%3AArtifact%7CInt64%29%3AArray%28Tag%29-instance-method" class="signature"><strong>#tags_for</strong>(artifact : Artifact | Int64) : Array(Tag)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#unlink%28from%3AArtifact%7CInt64%2Cto%3AArtifact%7CInt64%2Crel%3AString%29%3ANil-instance-method" class="signature"><strong>#unlink</strong>(from : Artifact | Int64, to : Artifact | Int64, rel : String) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#untag%28artifact%3AArtifact%7CInt64%2Cname%3AString%29%3ANil-instance-method" class="signature"><strong>#untag</strong>(artifact : Artifact | Int64, name : String) : Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#where%28code%3AString%2Cinclude_superseded%3ABool%3Dfalse%29%3AArray%28Artifact%29-instance-method" class="signature"><strong>#where</strong>(code : String, include_superseded : Bool = <span class="n">false</span>) : Array(Artifact)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#where%28code%3AString%2Cinclude_superseded%3ABool%3Dfalse%2C%2A%2Aconditions%29%3AArray%28Artifact%29-instance-method" class="signature"><strong>#where</strong>(code : String, include_superseded : Bool = <span class="n">false</span>, **conditions) : Array(Artifact)</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+  <div class="methods-inherited">
+    
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+    
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+    
+  </div>
+
+  
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(tx:DB::Transaction)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(tx : DB::Transaction)
+
+        <a class="method-permalink" href="#new%28tx%3ADB%3A%3ATransaction%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+  
+
+  
+
+  
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="commit:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>commit</strong> : Nil
+
+        <a class="method-permalink" href="#commit%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="create(plugin:String,kind:String,data):Artifact-instance-method">
+      <div class="signature">
+        
+        def <strong>create</strong>(plugin : String, kind : String, data) : <a href="../Artistry/Artifact.html">Artifact</a>
+
+        <a class="method-permalink" href="#create%28plugin%3AString%2Ckind%3AString%2Cdata%29%3AArtifact-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="create(kind_or_code:String,data):Artifact-instance-method">
+      <div class="signature">
+        
+        def <strong>create</strong>(kind_or_code : String, data) : <a href="../Artistry/Artifact.html">Artifact</a>
+
+        <a class="method-permalink" href="#create%28kind_or_code%3AString%2Cdata%29%3AArtifact-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="find(id:Int64):Artifact|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>find</strong>(id : Int64) : <a href="../Artistry/Artifact.html">Artifact</a> | Nil
+
+        <a class="method-permalink" href="#find%28id%3AInt64%29%3AArtifact%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="find(slug:String):Artifact|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>find</strong>(slug : String) : <a href="../Artistry/Artifact.html">Artifact</a> | Nil
+
+        <a class="method-permalink" href="#find%28slug%3AString%29%3AArtifact%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="link(from:Artifact|Int64,to:Artifact|Int64,rel:String,data=nil):Link-instance-method">
+      <div class="signature">
+        
+        def <strong>link</strong>(from : <a href="../Artistry/Artifact.html">Artifact</a> | Int64, to : <a href="../Artistry/Artifact.html">Artifact</a> | Int64, rel : String, data = <span class="n">nil</span>) : <a href="../Artistry/Link.html">Link</a>
+
+        <a class="method-permalink" href="#link%28from%3AArtifact%7CInt64%2Cto%3AArtifact%7CInt64%2Crel%3AString%2Cdata%3Dnil%29%3ALink-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="links_from(artifact:Artifact|Int64,rel:String|Nil=nil):Array(Link)-instance-method">
+      <div class="signature">
+        
+        def <strong>links_from</strong>(artifact : <a href="../Artistry/Artifact.html">Artifact</a> | Int64, rel : String | Nil = <span class="n">nil</span>) : Array(<a href="../Artistry/Link.html">Link</a>)
+
+        <a class="method-permalink" href="#links_from%28artifact%3AArtifact%7CInt64%2Crel%3AString%7CNil%3Dnil%29%3AArray%28Link%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="links_to(artifact:Artifact|Int64,rel:String|Nil=nil):Array(Link)-instance-method">
+      <div class="signature">
+        
+        def <strong>links_to</strong>(artifact : <a href="../Artistry/Artifact.html">Artifact</a> | Int64, rel : String | Nil = <span class="n">nil</span>) : Array(<a href="../Artistry/Link.html">Link</a>)
+
+        <a class="method-permalink" href="#links_to%28artifact%3AArtifact%7CInt64%2Crel%3AString%7CNil%3Dnil%29%3AArray%28Link%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="rollback:Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>rollback</strong> : Nil
+
+        <a class="method-permalink" href="#rollback%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="sync_tags(artifact:Artifact|Int64,names:Array(String)):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>sync_tags</strong>(artifact : <a href="../Artistry/Artifact.html">Artifact</a> | Int64, names : Array(String)) : Nil
+
+        <a class="method-permalink" href="#sync_tags%28artifact%3AArtifact%7CInt64%2Cnames%3AArray%28String%29%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tag(artifact:Artifact|Int64,name:String):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>tag</strong>(artifact : <a href="../Artistry/Artifact.html">Artifact</a> | Int64, name : String) : Nil
+
+        <a class="method-permalink" href="#tag%28artifact%3AArtifact%7CInt64%2Cname%3AString%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="tags_for(artifact:Artifact|Int64):Array(Tag)-instance-method">
+      <div class="signature">
+        
+        def <strong>tags_for</strong>(artifact : <a href="../Artistry/Artifact.html">Artifact</a> | Int64) : Array(<a href="../Artistry/Tag.html">Tag</a>)
+
+        <a class="method-permalink" href="#tags_for%28artifact%3AArtifact%7CInt64%29%3AArray%28Tag%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="unlink(from:Artifact|Int64,to:Artifact|Int64,rel:String):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>unlink</strong>(from : <a href="../Artistry/Artifact.html">Artifact</a> | Int64, to : <a href="../Artistry/Artifact.html">Artifact</a> | Int64, rel : String) : Nil
+
+        <a class="method-permalink" href="#unlink%28from%3AArtifact%7CInt64%2Cto%3AArtifact%7CInt64%2Crel%3AString%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="untag(artifact:Artifact|Int64,name:String):Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>untag</strong>(artifact : <a href="../Artistry/Artifact.html">Artifact</a> | Int64, name : String) : Nil
+
+        <a class="method-permalink" href="#untag%28artifact%3AArtifact%7CInt64%2Cname%3AString%29%3ANil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="where(code:String,include_superseded:Bool=false):Array(Artifact)-instance-method">
+      <div class="signature">
+        
+        def <strong>where</strong>(code : String, include_superseded : Bool = <span class="n">false</span>) : Array(<a href="../Artistry/Artifact.html">Artifact</a>)
+
+        <a class="method-permalink" href="#where%28code%3AString%2Cinclude_superseded%3ABool%3Dfalse%29%3AArray%28Artifact%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="where(code:String,include_superseded:Bool=false,**conditions):Array(Artifact)-instance-method">
+      <div class="signature">
+        
+        def <strong>where</strong>(code : String, include_superseded : Bool = <span class="n">false</span>, **conditions) : Array(<a href="../Artistry/Artifact.html">Artifact</a>)
+
+        <a class="method-permalink" href="#where%28code%3AString%2Cinclude_superseded%3ABool%3Dfalse%2C%2A%2Aconditions%29%3AArray%28Artifact%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+
+</div>
+
+</body>
+</html>

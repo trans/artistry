@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.19.1">
+<meta name="crystal_docs.project_version" content="0.9.0-dev">
+<meta name="crystal_docs.project_name" content="artistry">
+
+
+
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/doc.js"></script>
+
+  <meta name="repository-name" content="artistry">
+  <title>Artistry::Registry - artistry 0.9.0-dev</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../index.html">
+          artistry
+        </a>
+      </h1>
+
+      <span class="project-version">
+        0.9.0-dev
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent open current" data-id="artistry/Artistry" data-name="artistry">
+      <a href="../Artistry.html">Artistry</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/Artifact" data-name="artistry::artifact">
+      <a href="../Artistry/Artifact.html">Artifact</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Database" data-name="artistry::database">
+      <a href="../Artistry/Database.html">Database</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Link" data-name="artistry::link">
+      <a href="../Artistry/Link.html">Link</a>
+      
+    </li>
+  
+  <li class=" current" data-id="artistry/Artistry/Registry" data-name="artistry::registry">
+      <a href="../Artistry/Registry.html">Registry</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Tag" data-name="artistry::tag">
+      <a href="../Artistry/Tag.html">Tag</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Transaction" data-name="artistry::transaction">
+      <a href="../Artistry/Transaction.html">Transaction</a>
+      
+    </li>
+  
+  <li class="parent " data-id="artistry/Artistry/ValidationError" data-name="artistry::validationerror">
+      <a href="../Artistry/ValidationError.html">ValidationError</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/ValidationError/FieldError" data-name="artistry::validationerror::fielderror">
+      <a href="../Artistry/ValidationError/FieldError.html">FieldError</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Validator" data-name="artistry::validator">
+      <a href="../Artistry/Validator.html">Validator</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">
+    class
+  </span> Artistry::<wbr>Registry
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Artistry/Registry.html">Artistry::Registry</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      artistry/registry.cr
+    
+    <br/>
+  
+
+
+
+
+
+  
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28code%3AString%2Ckind%3AString%2Cplugin%3AString%2Cdescription%3ANil%7CString%2Csymbol%3ANil%7CString%2Cversion%3AInt32%29-class-method" class="signature"><strong>.new</strong>(code : String, kind : String, plugin : String, description : Nil | String, symbol : Nil | String, version : Int32)</a>
+        
+      </li>
+    
+  </ul>
+
+
+  
+  <h2>
+    <a id="class-method-summary" class="anchor" href="#class-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Class Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#all%3AArray%28Registry%29-class-method" class="signature"><strong>.all</strong> : Array(Registry)</a>
+        
+          <div class="summary"><p>List all registrations</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#allocate_code%28db%2Ckind%3AString%29%3AString-class-method" class="signature"><strong>.allocate_code</strong>(db, kind : String) : String</a>
+        
+          <div class="summary"><p>Find the shortest unique prefix for a kind name</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#find%28plugin%3AString%2Ckind%3AString%29%3ARegistry%7CNil-class-method" class="signature"><strong>.find</strong>(plugin : String, kind : String) : Registry | Nil</a>
+        
+          <div class="summary"><p>Lookup a registration by plugin and kind</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#find%28code%3AString%29%3ARegistry%7CNil-class-method" class="signature"><strong>.find</strong>(code : String) : Registry | Nil</a>
+        
+          <div class="summary"><p>Lookup a registration by code</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#find_by_kind%28kind%3AString%29%3ARegistry%7CNil-class-method" class="signature"><strong>.find_by_kind</strong>(kind : String) : Registry | Nil</a>
+        
+          <div class="summary"><p>Lookup a registration by kind name only (returns first match if multiple plugins use same kind)</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#get_schema%28code%3AString%2Cversion%3AInt32%29%3AJSON%3A%3AAny%7CNil-class-method" class="signature"><strong>.get_schema</strong>(code : String, version : Int32) : JSON::Any | Nil</a>
+        
+          <div class="summary"><p>Get the schema JSON for a code and version</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#hash_schema%28json%3AString%29%3AString-class-method" class="signature"><strong>.hash_schema</strong>(json : String) : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#normalize_schema%28schema%29%3AString-class-method" class="signature"><strong>.normalize_schema</strong>(schema) : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#register%28kind%3AString%2Cplugin%3AString%2Cschema%2Cdescription%3AString%7CNil%3Dnil%2Csymbol%3AString%7CNil%3Dnil%2Cindex%3AArray%28String%29%3D%5B%5DofString%29%3AString-class-method" class="signature"><strong>.register</strong>(kind : String, plugin : String, schema, description : String | Nil = <span class="n">nil</span>, symbol : String | Nil = <span class="n">nil</span>, index : Array(String) = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>) : String</a>
+        
+          <div class="summary"><p>Register a new artifact kind.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+  
+
+  
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#code%3AString-instance-method" class="signature"><strong>#code</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#description%3AString%7CNil-instance-method" class="signature"><strong>#description</strong> : String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#kind%3AString-instance-method" class="signature"><strong>#kind</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#plugin%3AString-instance-method" class="signature"><strong>#plugin</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#symbol%3AString%7CNil-instance-method" class="signature"><strong>#symbol</strong> : String | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#version%3AInt32-instance-method" class="signature"><strong>#version</strong> : Int32</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+  <div class="methods-inherited">
+    
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+    
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+    
+  </div>
+
+  
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(code:String,kind:String,plugin:String,description:Nil|String,symbol:Nil|String,version:Int32)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(code : String, kind : String, plugin : String, description : Nil | String, symbol : Nil | String, version : Int32)
+
+        <a class="method-permalink" href="#new%28code%3AString%2Ckind%3AString%2Cplugin%3AString%2Cdescription%3ANil%7CString%2Csymbol%3ANil%7CString%2Cversion%3AInt32%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+  
+  <h2>
+    <a id="class-method-detail" class="anchor" href="#class-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Class Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="all:Array(Registry)-class-method">
+      <div class="signature">
+        
+        def self.<strong>all</strong> : Array(<a href="../Artistry/Registry.html">Registry</a>)
+
+        <a class="method-permalink" href="#all%3AArray%28Registry%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>List all registrations</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="allocate_code(db,kind:String):String-class-method">
+      <div class="signature">
+        
+        def self.<strong>allocate_code</strong>(db, kind : String) : String
+
+        <a class="method-permalink" href="#allocate_code%28db%2Ckind%3AString%29%3AString-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Find the shortest unique prefix for a kind name</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="find(plugin:String,kind:String):Registry|Nil-class-method">
+      <div class="signature">
+        
+        def self.<strong>find</strong>(plugin : String, kind : String) : <a href="../Artistry/Registry.html">Registry</a> | Nil
+
+        <a class="method-permalink" href="#find%28plugin%3AString%2Ckind%3AString%29%3ARegistry%7CNil-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Lookup a registration by plugin and kind</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="find(code:String):Registry|Nil-class-method">
+      <div class="signature">
+        
+        def self.<strong>find</strong>(code : String) : <a href="../Artistry/Registry.html">Registry</a> | Nil
+
+        <a class="method-permalink" href="#find%28code%3AString%29%3ARegistry%7CNil-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Lookup a registration by code</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="find_by_kind(kind:String):Registry|Nil-class-method">
+      <div class="signature">
+        
+        def self.<strong>find_by_kind</strong>(kind : String) : <a href="../Artistry/Registry.html">Registry</a> | Nil
+
+        <a class="method-permalink" href="#find_by_kind%28kind%3AString%29%3ARegistry%7CNil-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Lookup a registration by kind name only (returns first match if multiple plugins use same kind)</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="get_schema(code:String,version:Int32):JSON::Any|Nil-class-method">
+      <div class="signature">
+        
+        def self.<strong>get_schema</strong>(code : String, version : Int32) : JSON::Any | Nil
+
+        <a class="method-permalink" href="#get_schema%28code%3AString%2Cversion%3AInt32%29%3AJSON%3A%3AAny%7CNil-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Get the schema JSON for a code and version</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="hash_schema(json:String):String-class-method">
+      <div class="signature">
+        
+        def self.<strong>hash_schema</strong>(json : String) : String
+
+        <a class="method-permalink" href="#hash_schema%28json%3AString%29%3AString-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="normalize_schema(schema):String-class-method">
+      <div class="signature">
+        
+        def self.<strong>normalize_schema</strong>(schema) : String
+
+        <a class="method-permalink" href="#normalize_schema%28schema%29%3AString-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="register(kind:String,plugin:String,schema,description:String|Nil=nil,symbol:String|Nil=nil,index:Array(String)=[]ofString):String-class-method">
+      <div class="signature">
+        
+        def self.<strong>register</strong>(kind : String, plugin : String, schema, description : String | Nil = <span class="n">nil</span>, symbol : String | Nil = <span class="n">nil</span>, index : Array(String) = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>) : String
+
+        <a class="method-permalink" href="#register%28kind%3AString%2Cplugin%3AString%2Cschema%2Cdescription%3AString%7CNil%3Dnil%2Csymbol%3AString%7CNil%3Dnil%2Cindex%3AArray%28String%29%3D%5B%5DofString%29%3AString-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Register a new artifact kind. Returns the assigned code.
+Schema can be any JSON-serializable value.
+Index is a list of field names to create expression indexes on.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+  
+
+  
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="code:String-instance-method">
+      <div class="signature">
+        
+        def <strong>code</strong> : String
+
+        <a class="method-permalink" href="#code%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="description:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>description</strong> : String | Nil
+
+        <a class="method-permalink" href="#description%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="kind:String-instance-method">
+      <div class="signature">
+        
+        def <strong>kind</strong> : String
+
+        <a class="method-permalink" href="#kind%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="plugin:String-instance-method">
+      <div class="signature">
+        
+        def <strong>plugin</strong> : String
+
+        <a class="method-permalink" href="#plugin%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="symbol:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>symbol</strong> : String | Nil
+
+        <a class="method-permalink" href="#symbol%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="version:Int32-instance-method">
+      <div class="signature">
+        
+        def <strong>version</strong> : Int32
+
+        <a class="method-permalink" href="#version%3AInt32-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.19.1">
+<meta name="crystal_docs.project_version" content="0.9.0-dev">
+<meta name="crystal_docs.project_name" content="artistry">
+
+
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/doc.js"></script>
+
+  <meta name="repository-name" content="artistry">
+  <title>artistry 0.9.0-dev</title>
+  <script type="text/javascript">
+  CrystalDocs.base_path = "";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="index.html">
+          artistry
+        </a>
+      </h1>
+
+      <span class="project-version">
+        0.9.0-dev
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent " data-id="artistry/Artistry" data-name="artistry">
+      <a href="Artistry.html">Artistry</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/Artifact" data-name="artistry::artifact">
+      <a href="Artistry/Artifact.html">Artifact</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Database" data-name="artistry::database">
+      <a href="Artistry/Database.html">Database</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Link" data-name="artistry::link">
+      <a href="Artistry/Link.html">Link</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Registry" data-name="artistry::registry">
+      <a href="Artistry/Registry.html">Registry</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Tag" data-name="artistry::tag">
+      <a href="Artistry/Tag.html">Tag</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Transaction" data-name="artistry::transaction">
+      <a href="Artistry/Transaction.html">Transaction</a>
+      
+    </li>
+  
+  <li class="parent " data-id="artistry/Artistry/ValidationError" data-name="artistry::validationerror">
+      <a href="Artistry/ValidationError.html">ValidationError</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/ValidationError/FieldError" data-name="artistry::validationerror::fielderror">
+      <a href="Artistry/ValidationError/FieldError.html">FieldError</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Validator" data-name="artistry::validator">
+      <a href="Artistry/Validator.html">Validator</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1><a id="artistry" class="anchor" href="#artistry">  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Artistry</h1>
+<p><strong>Artifact + Registry</strong> - A SQLite-based datastore that lets disparate libraries and applications register their data needs and coexist harmoniously in a single database.</p>
+<h2><a id="core-concepts" class="anchor" href="#core-concepts">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Core Concepts</h2>
+<ul>
+<li><strong>Registry</strong> - Plugins register artifact kinds with schemas; each gets a unique short code (E for &quot;event&quot;, U for &quot;user&quot;, etc.)</li>
+<li><strong>Unified Identity</strong> - Global auto-increment IDs across all artifacts, addressable via slugs like <code>E42</code></li>
+<li><strong>JSON Payload</strong> - Flexible schema stored as JSON, with expression indexes for performance</li>
+<li><strong>Schema Validation</strong> - JSON Schema subset with type checking, constraints, defaults, and optional fields</li>
+<li><strong>COW Versioning</strong> - Updates create new versions by default; full history preserved</li>
+<li><strong>Links</strong> - Cross-reference any artifact to any other with typed relations (auto-deleted with CASCADE)</li>
+</ul>
+<h2><a id="installation" class="anchor" href="#installation">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Installation</h2>
+<p>Add to your <code>shard.yml</code>:</p>
+<pre><code class="language-yaml">dependencies:
+  artistry:
+    github: trans/artistry</code></pre>
+<p>Then run <code>shards install</code>.</p>
+<h2><a id="usage" class="anchor" href="#usage">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Usage</h2>
+<h3><a id="setup" class="anchor" href="#setup">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Setup</h3>
+<pre><code class="language-crystal"><span class="k">require</span> <span class="s">&quot;artistry&quot;</span>
+
+<span class="c"># Open database (creates tables if needed)</span>
+<span class="t">Artistry</span>.open(<span class="s">&quot;myapp.db&quot;</span>)
+
+<span class="c"># Or use an existing DB connection (Artistry won&#39;t close it)</span>
+<span class="t">Artistry</span>.open(existing_db)</code></pre>
+<h3><a id="register-artifact-kinds" class="anchor" href="#register-artifact-kinds">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Register Artifact Kinds</h3>
+<p>Schemas use a JSON Schema subset (powered by the <a href="https://github.com/trans/jargon">Jargon</a> library):</p>
+<pre><code class="language-crystal"><span class="t">Artistry</span><span class="t">::</span><span class="t">Registry</span>.register(
+  kind: <span class="s">&quot;event&quot;</span>,
+  plugin: <span class="s">&quot;myapp&quot;</span>,
+  schema: {
+    <span class="k">type</span>: <span class="s">&quot;object&quot;</span>,
+    properties: {
+      title:    {<span class="k">type</span>: <span class="s">&quot;string&quot;</span>, minLength: <span class="n">1</span>},
+      date:     {<span class="k">type</span>: <span class="s">&quot;string&quot;</span>, format: <span class="s">&quot;date&quot;</span>},
+      priority: {<span class="k">type</span>: <span class="s">&quot;integer&quot;</span>, minimum: <span class="n">1</span>, maximum: <span class="n">5</span>},
+      status:   {<span class="k">type</span>: <span class="s">&quot;string&quot;</span>, <span class="k">enum</span>: [<span class="s">&quot;draft&quot;</span>, <span class="s">&quot;confirmed&quot;</span>], default: <span class="s">&quot;draft&quot;</span>},
+    },
+    required: [<span class="s">&quot;title&quot;</span>, <span class="s">&quot;date&quot;</span>],
+    additionalProperties: <span class="n">false</span>,
+  },
+  description: <span class="s">&quot;Calendar events&quot;</span>,
+  symbol: <span class="s">&quot;📅&quot;</span>,                 <span class="c"># optional emoji for display</span>
+  index: [<span class="s">&quot;title&quot;</span>, <span class="s">&quot;date&quot;</span>]      <span class="c"># creates expression indexes</span>
+)
+<span class="c"># =&gt; &quot;E&quot; (assigned code)</span></code></pre>
+<h3><a id="supported-schema-keywords" class="anchor" href="#supported-schema-keywords">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Supported Schema Keywords</h3>
+<p>| Category | Keywords |
+|----------|----------|
+| <strong>Type</strong> | <code>type</code> (<code>string</code>, <code>integer</code>, <code>number</code>, <code>boolean</code>, <code>array</code>, <code>object</code>, <code>null</code>) |
+| <strong>Object</strong> | <code>properties</code>, <code>required</code>, <code>additionalProperties</code> |
+| <strong>String</strong> | <code>minLength</code>, <code>maxLength</code>, <code>pattern</code>, <code>format</code> |
+| <strong>Number</strong> | <code>minimum</code>, <code>maximum</code>, <code>exclusiveMinimum</code>, <code>exclusiveMaximum</code>, <code>multipleOf</code> |
+| <strong>Array</strong> | <code>items</code>, <code>minItems</code>, <code>maxItems</code>, <code>uniqueItems</code> |
+| <strong>General</strong> | <code>enum</code>, <code>const</code>, <code>default</code>, <code>description</code> |
+| <strong>Composition</strong> | <code>$ref</code>, <code>$defs</code> |</p>
+<p>Fields listed in <code>required</code> must be present. Fields not in <code>required</code> are optional. Use <code>default</code> to provide fallback values (applied on create and update, stored in artifact data). Set <code>additionalProperties: false</code> to reject unknown fields.</p>
+<h3><a id="create-artifacts" class="anchor" href="#create-artifacts">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Create Artifacts</h3>
+<pre><code class="language-crystal"><span class="c"># status defaults to &quot;draft&quot;, priority is optional</span>
+event <span class="o">=</span> <span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.create(<span class="s">&quot;event&quot;</span>, {
+  title: <span class="s">&quot;Team Meeting&quot;</span>,
+  date: <span class="s">&quot;2025-06-15&quot;</span>,
+})
+
+event.slug       <span class="c"># =&gt; &quot;E1&quot;</span>
+event.id         <span class="c"># =&gt; 1</span>
+event[<span class="s">&quot;title&quot;</span>]   <span class="c"># =&gt; &quot;Team Meeting&quot; (as JSON::Any)</span>
+event[<span class="s">&quot;status&quot;</span>]  <span class="c"># =&gt; &quot;draft&quot; (applied from default)</span></code></pre>
+<h3><a id="validation" class="anchor" href="#validation">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Validation</h3>
+<pre><code class="language-crystal"><span class="c"># Invalid type - raises ValidationError</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.create(<span class="s">&quot;event&quot;</span>, {title: <span class="n">123</span>, date: <span class="s">&quot;2025-06-15&quot;</span>})
+<span class="c"># =&gt; ValidationError: title: expected String, got Int64</span>
+
+<span class="c"># Constraint violation</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.create(<span class="s">&quot;event&quot;</span>, {title: <span class="s">&quot;&quot;</span>, date: <span class="s">&quot;2025-06-15&quot;</span>})
+<span class="c"># =&gt; ValidationError: title: must be at least 1 characters</span>
+
+<span class="c"># Unknown field rejected (when additionalProperties: false)</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.create(<span class="s">&quot;event&quot;</span>, {title: <span class="s">&quot;Test&quot;</span>, date: <span class="s">&quot;2025-06-15&quot;</span>, extra: <span class="s">&quot;x&quot;</span>})
+<span class="c"># =&gt; ValidationError: extra: additionalProperties is false</span></code></pre>
+<h3><a id="query" class="anchor" href="#query">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Query</h3>
+<pre><code class="language-crystal"><span class="c"># By ID</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.find(<span class="n">1</span>)
+
+<span class="c"># By slug</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.find(<span class="s">&quot;E1&quot;</span>)
+
+<span class="c"># By kind</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.where(<span class="s">&quot;E&quot;</span>)
+
+<span class="c"># With conditions</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.where(<span class="s">&quot;E&quot;</span>, priority: <span class="n">1</span>)</code></pre>
+<h3><a id="update-cow-default" class="anchor" href="#update-cow-default">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Update (COW - default)</h3>
+<p>Creates a new version, supersedes the old:</p>
+<pre><code class="language-crystal">v1 <span class="o">=</span> <span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.create(<span class="s">&quot;event&quot;</span>, {title: <span class="s">&quot;Draft&quot;</span>, date: <span class="s">&quot;2025-06-15&quot;</span>})
+v2 <span class="o">=</span> v1.update({title: <span class="s">&quot;Final&quot;</span>})
+
+v1.superseded?   <span class="c"># =&gt; true</span>
+v2.current?      <span class="c"># =&gt; true</span>
+v1.successor     <span class="c"># =&gt; v2</span>
+v2.history       <span class="c"># =&gt; [v1, v2]</span></code></pre>
+<h3><a id="update-mutable" class="anchor" href="#update-mutable">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Update (Mutable)</h3>
+<p>Modifies in place:</p>
+<pre><code class="language-crystal">artifact.update!({title: <span class="s">&quot;Changed&quot;</span>})
+artifact.updated_at  <span class="c"># =&gt; unix milliseconds (Int64)</span></code></pre>
+<h3><a id="links" class="anchor" href="#links">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Links</h3>
+<p>Links use <code>rel</code> (relation) to describe the relationship type:</p>
+<pre><code class="language-crystal">event <span class="o">=</span> <span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.create(<span class="s">&quot;event&quot;</span>, {title: <span class="s">&quot;Meeting&quot;</span>, date: <span class="s">&quot;2025-06-15&quot;</span>})
+person <span class="o">=</span> <span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.create(<span class="s">&quot;person&quot;</span>, {name: <span class="s">&quot;Alice&quot;</span>})
+
+<span class="c"># Create link with relation type</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Link</span>.create(event, person, <span class="s">&quot;organizer&quot;</span>)
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Link</span>.create(event, person, <span class="s">&quot;attendee&quot;</span>, {role: <span class="s">&quot;presenter&quot;</span>})
+
+<span class="c"># Query links by relation</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Link</span>.from(event, <span class="s">&quot;attendee&quot;</span>)  <span class="c"># outgoing</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Link</span>.to(person, <span class="s">&quot;organizer&quot;</span>)  <span class="c"># incoming</span>
+
+<span class="c"># Resolve linked artifacts</span>
+link <span class="o">=</span> <span class="t">Artistry</span><span class="t">::</span><span class="t">Link</span>.from(event).first
+link.to   <span class="c"># =&gt; the person artifact</span>
+link.rel  <span class="c"># =&gt; &quot;attendee&quot;</span></code></pre>
+<h3><a id="tags" class="anchor" href="#tags">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Tags</h3>
+<p>Tags are normalized — each unique tag string is stored once, then linked to artifacts via a junction table.</p>
+<pre><code class="language-crystal"><span class="c"># Tag an artifact</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Tag</span>.tag(event, <span class="s">&quot;security&quot;</span>)
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Tag</span>.tag(event, <span class="s">&quot;mvp&quot;</span>)
+
+<span class="c"># Get tags for an artifact</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Tag</span>.<span class="k">for</span>(event)  <span class="c"># =&gt; [Tag(&quot;mvp&quot;), Tag(&quot;security&quot;)]</span>
+
+<span class="c"># Find artifacts by tag</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Tag</span>.artifacts(<span class="s">&quot;security&quot;</span>)
+
+<span class="c"># OR query - artifacts with any of the tags</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Tag</span>.artifacts_any([<span class="s">&quot;security&quot;</span>, <span class="s">&quot;mvp&quot;</span>])
+
+<span class="c"># AND query - artifacts with all of the tags</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Tag</span>.artifacts_all([<span class="s">&quot;security&quot;</span>, <span class="s">&quot;mvp&quot;</span>])
+
+<span class="c"># Replace all tags at once</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Tag</span>.sync(event, [<span class="s">&quot;v2&quot;</span>, <span class="s">&quot;released&quot;</span>])
+
+<span class="c"># Remove a tag</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Tag</span>.untag(event, <span class="s">&quot;mvp&quot;</span>)</code></pre>
+<h3><a id="transactions" class="anchor" href="#transactions">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Transactions</h3>
+<p>Wrap multiple operations in a transaction for atomicity. The block yields a transaction context with convenient shortcuts:</p>
+<pre><code class="language-crystal"><span class="t">Artistry</span>.transaction <span class="k">do</span> <span class="o">|</span>art<span class="o">|</span>
+  event <span class="o">=</span> art.create(<span class="s">&quot;event&quot;</span>, {title: <span class="s">&quot;Meeting&quot;</span>})
+  person <span class="o">=</span> art.create(<span class="s">&quot;person&quot;</span>, {name: <span class="s">&quot;Alice&quot;</span>})
+  art.link(event, person, <span class="s">&quot;organizer&quot;</span>)
+  art.tag(event, <span class="s">&quot;important&quot;</span>)
+<span class="k">end</span>
+<span class="c"># Auto-commits on success, auto-rollbacks on exception</span></code></pre>
+<p>The transaction context provides: <code>create</code>, <code>find</code>, <code>where</code>, <code>tag</code>, <code>untag</code>, <code>sync_tags</code>, <code>tags_for</code>, <code>link</code>, <code>unlink</code>, <code>links_from</code>, <code>links_to</code>, <code>rollback</code>, <code>commit</code>.</p>
+<p>Call <code>art.rollback</code> for explicit rollback, or raise <code>DB::Rollback</code> for a silent rollback (no exception propagated). Class methods (<code>Artistry::Artifact.create</code>, etc.) also work inside the block and participate in the same transaction.</p>
+<h3><a id="versioning-queries" class="anchor" href="#versioning-queries">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Versioning Queries</h3>
+<pre><code class="language-crystal"><span class="c"># Current versions only (default)</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.where(<span class="s">&quot;E&quot;</span>)
+
+<span class="c"># Include superseded versions</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.where(<span class="s">&quot;E&quot;</span>, include_superseded: <span class="n">true</span>)</code></pre>
+<h2><a id="tables" class="anchor" href="#tables">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Tables</h2>
+<p>| Table | Purpose |
+|-------|---------|
+| <code>identity</code> | Global ID generator with <code>created_at</code> |
+| <code>registry</code> | Kind registrations (<code>code</code>, <code>kind</code>, <code>plugin</code>, <code>description</code>, <code>symbol</code>, <code>version</code>) |
+| <code>schema</code> | Versioned schemas with JSON and hash |
+| <code>artifact</code> | All artifacts (JSON payload, COW tracking via <code>new_id</code>) |
+| <code>link</code> | Cross-artifact references (<code>from_id</code>, <code>to_id</code>, <code>rel</code>, <code>data</code>) - CASCADE delete |
+| <code>tag</code> | Unique tag names (<code>id</code>, <code>name</code>) |
+| <code>tagging</code> | Junction table linking tags to artifacts - CASCADE delete both directions |</p>
+<h2><a id="technical-notes" class="anchor" href="#technical-notes">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Technical Notes</h2>
+<ul>
+<li><strong>Timestamps</strong>: All <code>created_at</code>/<code>updated_at</code> fields are unix epoch milliseconds (Int64). Convert with <code>Time.unix_ms(ts)</code> in Crystal.</li>
+<li><strong>Foreign Keys</strong>: FK constraints are enforced. Link and tagging FKs use <code>ON DELETE CASCADE</code> - deleting an artifact removes its links and taggings; deleting a tag removes its taggings.</li>
+</ul>
+<h2><a id="license" class="anchor" href="#license">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>License</h2>
+<p>MIT</p>
+</div>
+</body>
+</html>
