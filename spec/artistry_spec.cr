@@ -16,6 +16,26 @@ describe Artistry do
     end
   end
 
+  describe "open with existing connection" do
+    it "uses a borrowed DB connection" do
+      db = DB.open("sqlite3:%3Amemory%3A")
+      db.exec("PRAGMA foreign_keys = ON")
+      Artistry.open(db)
+
+      code = Artistry::Registry.register(
+        kind: "event", plugin: "test",
+        schema: simple_schema({title: {type: "string"}}))
+      artifact = Artistry::Artifact.create(code, {title: "Test"})
+      artifact["title"].as_s.should eq("Test")
+
+      Artistry.close
+      # Borrowed connection should still be open after Artistry.close
+      db.scalar("SELECT 1").should eq(1)
+    ensure
+      db.try &.close
+    end
+  end
+
   describe Artistry::Registry do
     it "registers a new kind and assigns shortest code" do
       code = Artistry::Registry.register(

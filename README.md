@@ -32,6 +32,9 @@ require "artistry"
 
 # Open database (creates tables if needed)
 Artistry.open("myapp.db")
+
+# Or use an existing DB connection (Artistry won't close it)
+Artistry.open(existing_db)
 ```
 
 ### Register Artifact Kinds

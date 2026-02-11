@@ -8,16 +8,29 @@ require "./artistry/tag"
 require "./artistry/transaction"
 
 module Artistry
-  VERSION = "0.9.0"
+  VERSION = "0.9.1"
 
   class_property db_path : String = "artistry.db"
   class_getter! db : DB::Database
+  @@owns_db = false
 
+  # Open a new connection by path (Artistry owns and will close it)
   def self.open(path : String = db_path) : DB::Database
+    close if @@db
     uri = path == ":memory:" ? "sqlite3:%3Amemory%3A" : "sqlite3://#{path}"
     db = DB.open(uri)
     db.exec("PRAGMA foreign_keys = ON")
     @@db = db
+    @@owns_db = true
+    Database.ensure_schema(db)
+    db
+  end
+
+  # Use an existing connection (caller owns it, Artistry won't close it)
+  def self.open(db : DB::Database) : DB::Database
+    close if @@db
+    @@db = db
+    @@owns_db = false
     Database.ensure_schema(db)
     db
   end
@@ -29,9 +42,17 @@ module Artistry
     close
   end
 
+  def self.open(db : DB::Database, &block) : Nil
+    open(db)
+    yield db
+  ensure
+    close
+  end
+
   def self.close : Nil
-    @@db.try &.close
+    @@db.try(&.close) if @@owns_db
     @@db = nil
+    @@owns_db = false
   end
 
   @@tx_connections = {} of Fiber => DB::Connection
