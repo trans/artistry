@@ -1,10 +1,11 @@
 require "json"
+require "jargon"
 
 module Artistry
   class ValidationError < Exception
     getter errors : Array(FieldError)
 
-    record FieldError, field : String, message : String, expected : String? = nil, actual : String? = nil
+    record FieldError, field : String, message : String
 
     def initialize(@errors)
       super(format_message)
@@ -16,79 +17,75 @@ module Artistry
   end
 
   module Validator
-    TYPE_VALIDATORS = {
-      "string"  => ->(v : JSON::Any) { !v.as_s?.nil? },
-      "integer" => ->(v : JSON::Any) { !v.as_i64?.nil? },
-      "float"   => ->(v : JSON::Any) { !v.as_f?.nil? },
-      "number"  => ->(v : JSON::Any) { !v.as_i64?.nil? || !v.as_f?.nil? },
-      "boolean" => ->(v : JSON::Any) { !v.as_bool?.nil? },
-      "array"   => ->(v : JSON::Any) { !v.as_a?.nil? },
-      "object"  => ->(v : JSON::Any) { !v.as_h?.nil? },
-      "any"     => ->(v : JSON::Any) { true },
-    }
-
-    def self.validate(data : JSON::Any, schema : JSON::Any, strict : Bool = true) : Nil
-      errors = [] of ValidationError::FieldError
-
+    # Validate data against a JSON Schema.
+    # Raises ValidationError if validation fails.
+    def self.validate(data : JSON::Any, schema : JSON::Any) : Nil
+      jargon_schema = Jargon::Schema.from_json_any(schema)
       data_hash = data.as_h? || {} of String => JSON::Any
-      schema_hash = schema.as_h? || {} of String => JSON::Any
+      string_errors = Jargon::Validator.validate(data_hash, jargon_schema)
 
-      # Check each schema field
-      schema_hash.each do |field, type_spec|
-        type_str = type_spec.as_s? || "any"
-
-        value = data_hash[field]?
-
-        # Check if field is missing
-        if value.nil?
-          errors << ValidationError::FieldError.new(field, "required field is missing")
-          next
-        end
-
-        # Check if value is null
-        if value.raw.nil?
-          errors << ValidationError::FieldError.new(field, "field cannot be null")
-          next
-        end
-
-        # Type check
-        validator = TYPE_VALIDATORS[type_str]?
-        unless validator
-          errors << ValidationError::FieldError.new(field, "unknown type '#{type_str}' in schema")
-          next
-        end
-
-        unless validator.call(value)
-          errors << ValidationError::FieldError.new(
-            field, "expected #{type_str}, got #{json_type_name(value)}",
-            type_str, json_type_name(value)
-          )
-        end
+      unless string_errors.empty?
+        field_errors = string_errors.map { |msg| parse_error(msg) }
+        raise ValidationError.new(field_errors)
       end
+    end
 
-      # Strict mode: check for unknown fields
-      if strict
-        schema_keys = schema_hash.keys.to_set
-        data_hash.each_key do |field|
-          unless schema_keys.includes?(field)
-            errors << ValidationError::FieldError.new(field, "unknown field")
+    # Apply default values from schema to data. Returns new JSON::Any with defaults filled in.
+    def self.apply_defaults(data : JSON::Any, schema : JSON::Any) : JSON::Any
+      jargon_schema = Jargon::Schema.from_json_any(schema)
+      root = jargon_schema.root
+      apply_property_defaults(data, root)
+    end
+
+    private def self.apply_property_defaults(data : JSON::Any, prop : Jargon::Property) : JSON::Any
+      props = prop.properties
+      return data unless props
+
+      obj = data.as_h?
+      return data unless obj
+
+      result = obj.dup
+      props.each do |key, child_prop|
+        if result.has_key?(key)
+          # Recurse into existing nested objects
+          if child_prop.properties
+            result[key] = apply_property_defaults(result[key], child_prop)
+          end
+        else
+          # Apply default if present
+          if default_val = child_prop.default
+            result[key] = default_val
           end
         end
       end
 
-      raise ValidationError.new(errors) unless errors.empty?
+      JSON::Any.new(result)
     end
 
-    private def self.json_type_name(value : JSON::Any) : String
-      case value.raw
-      when String  then "string"
-      when Int64   then "integer"
-      when Float64 then "float"
-      when Bool    then "boolean"
-      when Array   then "array"
-      when Hash    then "object"
-      when Nil     then "null"
-      else              "unknown"
+    # Parse a Jargon error string into a FieldError.
+    private def self.parse_error(msg : String) : ValidationError::FieldError
+      # Jargon error formats:
+      #   "Missing required field: name"
+      #   "Invalid type for name: expected string, got Int64"
+      #   "Value for name must be >= 1"
+      #   "Invalid value for name: must be one of a, b"
+      #   "name must have at least 1 items"
+      #   "Unknown property 'name': additionalProperties is false"
+      case msg
+      when /^Missing required field: (.+)$/
+        ValidationError::FieldError.new($1, "required field missing")
+      when /^Invalid type for (.+?): expected (.+?), got (.+)$/
+        ValidationError::FieldError.new($1, "expected #{$2}, got #{$3}")
+      when /^Value for (.+?) must be (.+)$/
+        ValidationError::FieldError.new($1, "must be #{$2}")
+      when /^Invalid value for (.+?): must be one of (.+)$/
+        ValidationError::FieldError.new($1, "must be one of #{$2}")
+      when /^(.+?) must have (.+)$/
+        ValidationError::FieldError.new($1, "must have #{$2}")
+      when /^Unknown property '(.+?)': (.+)$/
+        ValidationError::FieldError.new($1, $2)
+      else
+        ValidationError::FieldError.new("(unknown)", msg)
       end
     end
   end

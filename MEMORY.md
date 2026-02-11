@@ -23,8 +23,8 @@ We went with "link" terminology (not "edge") because of the hyperlink metaphor t
 ### Slugs
 Format is `{CODE}{ID}` with no separator, e.g., `E42` not `E:42`. The colon was deemed unnecessary.
 
-### Schema Validation
-Validation is always enabled (no opt-out). Strict mode is default (unknown fields rejected). Use `strict: false` to allow extra fields. All schema fields are required - no optional fields or defaults (kept simple for now).
+### Schema Validation (JSON Schema)
+Schemas use a JSON Schema subset (powered by the Jargon library). Validation is always enabled (no opt-out). Schemas control strictness via `additionalProperties: false`. Optional fields and defaults are supported natively.
 
 ### Timestamps
 All timestamps (`created_at`, `updated_at`) are stored as INTEGER (unix epoch milliseconds) for performance. Convert with `Time.unix_ms(timestamp)` in Crystal or `datetime(ts/1000, 'unixepoch')` in SQL.
@@ -54,37 +54,52 @@ When registering `kind: "event"`, the system assigns the shortest available pref
 
 First-come-first-serve.
 
-## Schema Validation
+## Schema Validation (JSON Schema Subset)
 
-Supported types: `string`, `integer`, `float`, `number`, `boolean`, `array`, `object`, `any`
+Schemas use a JSON Schema subset via the Jargon library (`Jargon::Validator`). Supported keywords:
+`type`, `properties`, `required`, `additionalProperties`, `default`, `enum`, `const`,
+`minimum`, `maximum`, `exclusiveMinimum`, `exclusiveMaximum`, `multipleOf`,
+`minLength`, `maxLength`, `pattern`, `format`, `items`, `minItems`, `maxItems`,
+`uniqueItems`, `description`, `$ref`, `$defs`
+
+NOT supported: `allOf`/`anyOf`/`oneOf`/`not`, `if`/`then`/`else`, `patternProperties`, `prefixItems`
 
 ```crystal
 Artistry::Registry.register(
   kind: "task",
   plugin: "app",
-  schema: {title: "string", count: "integer", done: "boolean"}
+  schema: {
+    type: "object",
+    properties: {
+      title:  {type: "string", minLength: 1},
+      count:  {type: "integer", minimum: 0, default: 0},
+      status: {type: "string", enum: ["open", "closed"], default: "open"},
+      done:   {type: "boolean"},
+    },
+    required: ["title", "done"],
+    additionalProperties: false,
+  }
 )
 
-# Valid
-Artistry::Artifact.create("task", {title: "Test", count: 1, done: false})
+# Valid — count defaults to 0, status defaults to "open"
+Artistry::Artifact.create("task", {title: "Test", done: false})
 
 # Invalid - wrong type
-Artistry::Artifact.create("task", {title: 123, ...})
-# => ValidationError: title: expected string, got integer
+Artistry::Artifact.create("task", {title: 123, done: false})
+# => ValidationError: title: expected String, got Int64
 
-# Invalid - unknown field (strict default)
-Artistry::Artifact.create("task", {..., extra: "x"})
-# => ValidationError: extra: unknown field
+# Invalid - unknown field (additionalProperties: false)
+Artistry::Artifact.create("task", {title: "Test", done: false, extra: "x"})
+# => ValidationError: extra: additionalProperties is false
 
-# Allow unknown fields
-Artistry::Artifact.create("task", data, strict: false)
+# Allow unknown fields (omit additionalProperties or set to true)
 ```
 
 ## What's Implemented
 
 - Registration with auto-code assignment
 - Schema versioning (bumps version when schema hash changes)
-- Schema validation with type checking
+- JSON Schema validation (via Jargon) with type checking, constraints, defaults
 - Expression indexes via `index: ["field1", "field2"]`
 - Optional `symbol` field for emoji association with kinds
 - Artifact CRUD
@@ -96,27 +111,6 @@ Artistry::Artifact.create("task", data, strict: false)
 - Links between artifacts with optional data payload
 - Tags with normalized two-table design (tag + tagging junction)
 - Transactions via `Artistry.transaction { |art| }` with context object (fiber-safe)
-
-## TODO: Optional Fields & Defaults
-
-Consider adding support for optional fields and default values. Design discussion notes:
-
-**Possible syntax for defaults** (array format, JSON-compatible):
-```crystal
-schema: {
-  title: "string",              # required
-  count: ["integer", 0],        # optional with default
-  status: ["string", "draft"]   # optional with default
-}
-```
-
-**Questions to resolve:**
-- Do we need nil/null support, or is "field absent" sufficient?
-- Should `?` suffix mean nullable (`"string?"`) or optional?
-- Are defaults applied at create time only, or also when field is missing on read?
-- Should defaults be stored in the artifact, or computed on access?
-
-Keep it simple - start with defaults only, skip nil support unless needed.
 
 ## Tags (Implemented)
 
@@ -139,8 +133,6 @@ auto-rollbacks on exception. `DB::Rollback` for silent rollback.
 
 ## What's NOT Implemented
 
-- Optional fields in schemas (all fields required)
-- Default values for schema fields
 - Richer query operators (like, gt, lt, etc.)
 - Full-text search (FTS5)
 - Migration tooling for schema changes
@@ -152,16 +144,23 @@ auto-rollbacks on exception. `DB::Rollback` for silent rollback.
 # Open DB
 Artistry.open("path.db")
 
-# Register
+# Register with JSON Schema
 Artistry::Registry.register(
   kind: "event",
   plugin: "myapp",
-  schema: {title: "string"},
+  schema: {
+    type: "object",
+    properties: {
+      title: {type: "string", minLength: 1},
+      date:  {type: "string", format: "date"},
+    },
+    required: ["title"],
+  },
   symbol: "📅",
   index: ["title"]
 )
 
-# Create
+# Create (defaults applied automatically)
 artifact = Artistry::Artifact.create("event", {title: "Meeting"})
 
 # COW update
@@ -201,14 +200,14 @@ src/
   artistry.cr         # Main module, open/close DB
   artistry/
     database.cr       # Schema DDL
-    validator.cr      # Schema validation
+    validator.cr      # JSON Schema validation (via Jargon)
     registry.cr       # Registration logic
     artifact.cr       # Artifact CRUD, COW, queries
     link.cr           # Cross-references
     tag.cr            # Tags (normalized two-table)
     transaction.cr    # Transaction context (delegation)
 spec/
-  artistry_spec.cr    # 73 specs covering all features
+  artistry_spec.cr    # 92 specs covering all features
 ```
 
 ## Testing

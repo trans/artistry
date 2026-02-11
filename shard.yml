@@ -1,5 +1,5 @@
 name: artistry
-version: 0.8.1
+version: 0.9.0
 
 authors:
   - Thomas Sawyer <transfire@gmail.com>
@@ -11,3 +11,5 @@ license: MIT
 dependencies:
   sqlite3:
     github: crystal-lang/crystal-sqlite3
+  jargon:
+    path: ../jargon

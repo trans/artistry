@@ -5,12 +5,12 @@ module Artistry
 
     # -- Artifact operations --
 
-    def create(kind_or_code : String, data, strict : Bool = true) : Artifact
-      Artifact.create(kind_or_code, data, strict)
+    def create(kind_or_code : String, data) : Artifact
+      Artifact.create(kind_or_code, data)
     end
 
-    def create(plugin : String, kind : String, data, strict : Bool = true) : Artifact
-      Artifact.create(plugin, kind, data, strict)
+    def create(plugin : String, kind : String, data) : Artifact
+      Artifact.create(plugin, kind, data)
     end
 
     def find(id : Int64) : Artifact?

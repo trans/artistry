@@ -25,18 +25,20 @@ module Artistry
     end
 
     # Create a new artifact (internal - by registry)
-    private def self.create_with_registry(reg : Registry, data, strict : Bool = true) : Artifact
+    private def self.create_with_registry(reg : Registry, data) : Artifact
       db = Artistry.conn
 
       # Convert to JSON for validation and storage
-      data_json = data.to_json
-      data_parsed = JSON.parse(data_json)
+      data_parsed = JSON.parse(data.to_json)
 
-      # Validate against schema
+      # Apply defaults and validate against schema
       schema = Registry.get_schema(reg.code, reg.version)
       if schema
-        Validator.validate(data_parsed, schema, strict)
+        data_parsed = Validator.apply_defaults(data_parsed, schema)
+        Validator.validate(data_parsed, schema)
       end
+
+      data_json = data_parsed.to_json
 
       # Create identity
       db.exec("INSERT INTO identity DEFAULT VALUES")
@@ -59,14 +61,14 @@ module Artistry
     end
 
     # Create via plugin and kind names
-    def self.create(plugin : String, kind : String, data, strict : Bool = true) : Artifact
+    def self.create(plugin : String, kind : String, data) : Artifact
       reg = Registry.find(plugin, kind)
       raise "Unknown artifact: #{plugin}/#{kind}" unless reg
-      create_with_registry(reg, data, strict)
+      create_with_registry(reg, data)
     end
 
     # Create via code or kind name
-    def self.create(kind_or_code : String, data, strict : Bool = true) : Artifact
+    def self.create(kind_or_code : String, data) : Artifact
       # First check if it's a code (uppercase)
       reg = Registry.find(kind_or_code.upcase)
       unless reg
@@ -74,7 +76,7 @@ module Artistry
         reg = Registry.find_by_kind(kind_or_code)
       end
       raise "Unknown artifact kind: #{kind_or_code}" unless reg
-      create_with_registry(reg, data, strict)
+      create_with_registry(reg, data)
     end
 
     # Build artifact from database row
@@ -267,7 +269,7 @@ module Artistry
     end
 
     # COW update - creates new version, supersedes this one
-    def update(new_data, strict : Bool = true) : Artifact
+    def update(new_data) : Artifact
       raise "Cannot update superseded artifact (use .latest.update)" if superseded?
 
       db = Artistry.conn
@@ -285,13 +287,14 @@ module Artistry
       merged = data.as_h.merge(new_json)
       merged_parsed = JSON.parse(merged.to_json)
 
-      # Validate merged data against current schema
+      # Apply defaults and validate merged data against current schema
       schema = Registry.get_schema(code, current_version)
       if schema
-        Validator.validate(merged_parsed, schema, strict)
+        merged_parsed = Validator.apply_defaults(merged_parsed, schema)
+        Validator.validate(merged_parsed, schema)
       end
 
-      data_json = merged.to_json
+      data_json = merged_parsed.to_json
       data_hash = Artifact.hash_data(data_json)
 
       # Create new identity for new version
@@ -320,7 +323,7 @@ module Artistry
     end
 
     # Mutable update - modifies in place, sets updated_at
-    def update!(new_data, strict : Bool = true) : Artifact
+    def update!(new_data) : Artifact
       db = Artistry.conn
 
       # Get current schema version for this code
@@ -336,13 +339,14 @@ module Artistry
       merged = data.as_h.merge(new_json)
       merged_parsed = JSON.parse(merged.to_json)
 
-      # Validate merged data against current schema
+      # Apply defaults and validate merged data against current schema
       schema = Registry.get_schema(code, current_version)
       if schema
-        Validator.validate(merged_parsed, schema, strict)
+        merged_parsed = Validator.apply_defaults(merged_parsed, schema)
+        Validator.validate(merged_parsed, schema)
       end
 
-      data_json = merged.to_json
+      data_json = merged_parsed.to_json
       data_hash = Artifact.hash_data(data_json)
       now = Artifact.now_ms
 

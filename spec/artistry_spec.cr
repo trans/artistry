@@ -1,5 +1,14 @@
 require "./spec_helper"
 
+# Helper to build a simple object schema
+def simple_schema(props : NamedTuple, required : Array(String) = props.keys.map(&.to_s).to_a)
+  {
+    type:       "object",
+    properties: props,
+    required:   required,
+  }
+end
+
 describe Artistry do
   around_each do |example|
     Artistry.open(":memory:") do
@@ -12,19 +21,19 @@ describe Artistry do
       code = Artistry::Registry.register(
         kind: "event",
         plugin: "memo",
-        schema: {title: "string"}
+        schema: simple_schema({title: {type: "string"}})
       )
       code.should eq("E")
     end
 
     it "assigns longer code when short one is taken" do
-      Artistry::Registry.register(kind: "event", plugin: "memo", schema: {} of String => String)
-      code = Artistry::Registry.register(kind: "entry", plugin: "blog", schema: {} of String => String)
+      Artistry::Registry.register(kind: "event", plugin: "memo", schema: {type: "object"})
+      code = Artistry::Registry.register(kind: "entry", plugin: "blog", schema: {type: "object"})
       code.should eq("EN")
     end
 
     it "finds registration by code" do
-      Artistry::Registry.register(kind: "event", plugin: "memo", schema: {} of String => String)
+      Artistry::Registry.register(kind: "event", plugin: "memo", schema: {type: "object"})
       reg = Artistry::Registry.find("E")
       reg.should_not be_nil
       reg.not_nil!.kind.should eq("event")
@@ -32,7 +41,7 @@ describe Artistry do
     end
 
     it "finds registration by plugin and kind" do
-      Artistry::Registry.register(kind: "event", plugin: "memo", schema: {} of String => String)
+      Artistry::Registry.register(kind: "event", plugin: "memo", schema: {type: "object"})
       reg = Artistry::Registry.find("memo", "event")
       reg.should_not be_nil
       reg.not_nil!.code.should eq("E")
@@ -74,7 +83,7 @@ describe Artistry do
       Artistry::Registry.register(
         kind: "event",
         plugin: "memo",
-        schema: {title: "string"},
+        schema: simple_schema({title: {type: "string"}}),
         description: "Calendar events"
       )
     end
@@ -120,8 +129,8 @@ describe Artistry do
     end
 
     it "queries with conditions" do
-      Artistry::Artifact.create("E", {title: "Meeting", priority: "high"}, strict: false)
-      Artistry::Artifact.create("E", {title: "Lunch", priority: "low"}, strict: false)
+      Artistry::Artifact.create("E", {title: "Meeting", priority: "high"})
+      Artistry::Artifact.create("E", {title: "Lunch", priority: "low"})
       results = Artistry::Artifact.where("E", priority: "high")
       results.size.should eq(1)
       results[0]["title"].as_s.should eq("Meeting")
@@ -234,8 +243,10 @@ describe Artistry do
 
   describe Artistry::Link do
     before_each do
-      Artistry::Registry.register(kind: "event", plugin: "memo", schema: {title: "string"})
-      Artistry::Registry.register(kind: "person", plugin: "memo", schema: {name: "string"})
+      Artistry::Registry.register(kind: "event", plugin: "memo",
+        schema: simple_schema({title: {type: "string"}}))
+      Artistry::Registry.register(kind: "person", plugin: "memo",
+        schema: simple_schema({name: {type: "string"}}))
     end
 
     it "creates a link between artifacts" do
@@ -307,12 +318,17 @@ describe Artistry do
         kind: "task",
         plugin: "test",
         schema: {
-          title: "string",
-          count: "integer",
-          score: "float",
-          done: "boolean",
-          tags: "array",
-          meta: "object",
+          type:       "object",
+          properties: {
+            title: {type: "string"},
+            count: {type: "integer"},
+            score: {type: "number"},
+            done:  {type: "boolean"},
+            tags:  {type: "array", items: {type: "string"}},
+            meta:  {type: "object"},
+          },
+          required:             ["title", "count", "score", "done", "tags", "meta"],
+          additionalProperties: false,
         }
       )
     end
@@ -326,7 +342,7 @@ describe Artistry do
       end
 
       it "rejects wrong type for string field" do
-        expect_raises(Artistry::ValidationError, /title.*expected string/) do
+        expect_raises(Artistry::ValidationError, /title.*expected/) do
           Artistry::Artifact.create("task", {
             title: 123, count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
           })
@@ -341,18 +357,25 @@ describe Artistry do
       end
 
       it "rejects wrong type for integer field" do
-        expect_raises(Artistry::ValidationError, /count.*expected integer/) do
+        expect_raises(Artistry::ValidationError, /count.*expected/) do
           Artistry::Artifact.create("task", {
             title: "Test", count: "not a number", score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
           })
         end
       end
 
-      it "accepts valid float field" do
+      it "accepts valid number field" do
         artifact = Artistry::Artifact.create("task", {
           title: "Test", count: 1, score: 3.14, done: false, tags: [] of String, meta: {} of String => String,
         })
         artifact["score"].as_f.should eq(3.14)
+      end
+
+      it "accepts integer as number field" do
+        artifact = Artistry::Artifact.create("task", {
+          title: "Test", count: 1, score: 10, done: false, tags: [] of String, meta: {} of String => String,
+        })
+        artifact["score"].as_i.should eq(10)
       end
 
       it "accepts valid boolean field" do
@@ -385,22 +408,261 @@ describe Artistry do
           })
         end
       end
+
+      it "accepts missing optional field" do
+        Artistry::Registry.register(
+          kind: "note",
+          plugin: "test",
+          schema: {
+            type:       "object",
+            properties: {
+              title: {type: "string"},
+              body:  {type: "string"},
+            },
+            required: ["title"],
+          }
+        )
+        artifact = Artistry::Artifact.create("note", {title: "Hello"})
+        artifact["title"].as_s.should eq("Hello")
+      end
     end
 
-    describe "strict mode" do
-      it "rejects unknown fields by default" do
-        expect_raises(Artistry::ValidationError, /extra.*unknown field/) do
+    describe "additionalProperties" do
+      it "rejects unknown fields when additionalProperties is false" do
+        expect_raises(Artistry::ValidationError, /extra/) do
           Artistry::Artifact.create("task", {
             title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String, extra: "data",
           })
         end
       end
 
-      it "allows unknown fields with strict: false" do
-        artifact = Artistry::Artifact.create("task", {
-          title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String, extra: "data",
-        }, strict: false)
+      it "allows unknown fields when additionalProperties is not false" do
+        Artistry::Registry.register(
+          kind: "note",
+          plugin: "test",
+          schema: {
+            type:       "object",
+            properties: {title: {type: "string"}},
+            required:   ["title"],
+          }
+        )
+        artifact = Artistry::Artifact.create("note", {title: "Test", extra: "data"})
         artifact["extra"].as_s.should eq("data")
+      end
+    end
+
+    describe "default values" do
+      it "applies default when field is absent" do
+        Artistry::Registry.register(
+          kind: "item",
+          plugin: "test",
+          schema: {
+            type:       "object",
+            properties: {
+              title:  {type: "string"},
+              status: {type: "string", default: "draft"},
+            },
+            required: ["title"],
+          }
+        )
+        artifact = Artistry::Artifact.create("item", {title: "Hello"})
+        artifact["status"].as_s.should eq("draft")
+      end
+
+      it "does not override explicit value with default" do
+        Artistry::Registry.register(
+          kind: "item",
+          plugin: "test",
+          schema: {
+            type:       "object",
+            properties: {
+              title:  {type: "string"},
+              status: {type: "string", default: "draft"},
+            },
+            required: ["title"],
+          }
+        )
+        artifact = Artistry::Artifact.create("item", {title: "Hello", status: "published"})
+        artifact["status"].as_s.should eq("published")
+      end
+
+      it "applies defaults on update" do
+        Artistry::Registry.register(
+          kind: "item",
+          plugin: "test",
+          schema: {
+            type:       "object",
+            properties: {
+              title:  {type: "string"},
+              status: {type: "string", default: "draft"},
+            },
+            required: ["title"],
+          }
+        )
+        artifact = Artistry::Artifact.create("item", {title: "Hello"})
+        updated = artifact.update({title: "Updated"})
+        updated["status"].as_s.should eq("draft")
+      end
+    end
+
+    describe "string constraints" do
+      before_each do
+        Artistry::Registry.register(
+          kind: "constrained",
+          plugin: "test",
+          schema: {
+            type:       "object",
+            properties: {
+              name:  {type: "string", minLength: 2, maxLength: 10},
+              code:  {type: "string", pattern: "^[A-Z]+$"},
+            },
+            required: ["name"],
+          }
+        )
+      end
+
+      it "rejects string shorter than minLength" do
+        expect_raises(Artistry::ValidationError, /name/) do
+          Artistry::Artifact.create("constrained", {name: "A"})
+        end
+      end
+
+      it "rejects string longer than maxLength" do
+        expect_raises(Artistry::ValidationError, /name/) do
+          Artistry::Artifact.create("constrained", {name: "A" * 11})
+        end
+      end
+
+      it "rejects string not matching pattern" do
+        expect_raises(Artistry::ValidationError, /code.*pattern/) do
+          Artistry::Artifact.create("constrained", {name: "Valid", code: "lower"})
+        end
+      end
+
+      it "accepts string matching all constraints" do
+        artifact = Artistry::Artifact.create("constrained", {name: "Valid", code: "ABC"})
+        artifact["name"].as_s.should eq("Valid")
+        artifact["code"].as_s.should eq("ABC")
+      end
+    end
+
+    describe "numeric constraints" do
+      before_each do
+        Artistry::Registry.register(
+          kind: "ranged",
+          plugin: "test",
+          schema: {
+            type:       "object",
+            properties: {
+              age:   {type: "integer", minimum: 0, maximum: 150},
+              score: {type: "number", exclusiveMinimum: 0, exclusiveMaximum: 100},
+            },
+            required: ["age"],
+          }
+        )
+      end
+
+      it "rejects integer below minimum" do
+        expect_raises(Artistry::ValidationError, /age/) do
+          Artistry::Artifact.create("ranged", {age: -1})
+        end
+      end
+
+      it "rejects integer above maximum" do
+        expect_raises(Artistry::ValidationError, /age/) do
+          Artistry::Artifact.create("ranged", {age: 200})
+        end
+      end
+
+      it "rejects value at exclusiveMinimum" do
+        expect_raises(Artistry::ValidationError, /score/) do
+          Artistry::Artifact.create("ranged", {age: 25, score: 0})
+        end
+      end
+
+      it "rejects value at exclusiveMaximum" do
+        expect_raises(Artistry::ValidationError, /score/) do
+          Artistry::Artifact.create("ranged", {age: 25, score: 100})
+        end
+      end
+
+      it "accepts values within range" do
+        artifact = Artistry::Artifact.create("ranged", {age: 25, score: 50.5})
+        artifact["age"].as_i.should eq(25)
+      end
+    end
+
+    describe "array constraints" do
+      before_each do
+        Artistry::Registry.register(
+          kind: "listing",
+          plugin: "test",
+          schema: {
+            type:       "object",
+            properties: {
+              items: {type: "array", items: {type: "string"}, minItems: 1, maxItems: 3},
+            },
+            required: ["items"],
+          }
+        )
+      end
+
+      it "rejects array with wrong item type" do
+        expect_raises(Artistry::ValidationError) do
+          Artistry::Artifact.create("listing", {items: [1, 2]})
+        end
+      end
+
+      it "rejects array shorter than minItems" do
+        expect_raises(Artistry::ValidationError, /items/) do
+          Artistry::Artifact.create("listing", {items: [] of String})
+        end
+      end
+
+      it "rejects array longer than maxItems" do
+        expect_raises(Artistry::ValidationError, /items/) do
+          Artistry::Artifact.create("listing", {items: ["a", "b", "c", "d"]})
+        end
+      end
+
+      it "accepts valid array" do
+        artifact = Artistry::Artifact.create("listing", {items: ["a", "b"]})
+        artifact["items"].as_a.size.should eq(2)
+      end
+    end
+
+    describe "enum validation" do
+      it "accepts value in enum" do
+        Artistry::Registry.register(
+          kind: "status",
+          plugin: "test",
+          schema: {
+            type:       "object",
+            properties: {
+              state: {type: "string", enum: ["open", "closed", "pending"]},
+            },
+            required: ["state"],
+          }
+        )
+        artifact = Artistry::Artifact.create("status", {state: "open"})
+        artifact["state"].as_s.should eq("open")
+      end
+
+      it "rejects value not in enum" do
+        Artistry::Registry.register(
+          kind: "status",
+          plugin: "test",
+          schema: {
+            type:       "object",
+            properties: {
+              state: {type: "string", enum: ["open", "closed", "pending"]},
+            },
+            required: ["state"],
+          }
+        )
+        expect_raises(Artistry::ValidationError, /state.*must be one of/) do
+          Artistry::Artifact.create("status", {state: "invalid"})
+        end
       end
     end
 
@@ -409,7 +671,7 @@ describe Artistry do
         artifact = Artistry::Artifact.create("task", {
           title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
         })
-        expect_raises(Artistry::ValidationError, /count.*expected integer/) do
+        expect_raises(Artistry::ValidationError, /count.*expected/) do
           artifact.update({count: "invalid"})
         end
       end
@@ -418,17 +680,9 @@ describe Artistry do
         artifact = Artistry::Artifact.create("task", {
           title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
         })
-        expect_raises(Artistry::ValidationError, /count.*expected integer/) do
+        expect_raises(Artistry::ValidationError, /count.*expected/) do
           artifact.update!({count: "invalid"})
         end
-      end
-
-      it "allows unknown fields on update with strict: false" do
-        artifact = Artistry::Artifact.create("task", {
-          title: "Test", count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
-        })
-        updated = artifact.update({extra: "data"}, strict: false)
-        updated["extra"].as_s.should eq("data")
       end
     end
 
@@ -450,7 +704,8 @@ describe Artistry do
 
   describe Artistry::Tag do
     before_each do
-      Artistry::Registry.register(kind: "event", plugin: "memo", schema: {title: "string"})
+      Artistry::Registry.register(kind: "event", plugin: "memo",
+        schema: simple_schema({title: {type: "string"}}))
     end
 
     it "creates a tag" do
@@ -607,8 +862,10 @@ describe Artistry do
 
   describe "Artistry.transaction" do
     before_each do
-      Artistry::Registry.register(kind: "event", plugin: "memo", schema: {title: "string"})
-      Artistry::Registry.register(kind: "person", plugin: "memo", schema: {name: "string"})
+      Artistry::Registry.register(kind: "event", plugin: "memo",
+        schema: simple_schema({title: {type: "string"}}))
+      Artistry::Registry.register(kind: "person", plugin: "memo",
+        schema: simple_schema({name: {type: "string"}}))
     end
 
     it "commits on success" do

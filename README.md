@@ -7,7 +7,7 @@
 - **Registry** - Plugins register artifact kinds with schemas; each gets a unique short code (E for "event", U for "user", etc.)
 - **Unified Identity** - Global auto-increment IDs across all artifacts, addressable via slugs like `E42`
 - **JSON Payload** - Flexible schema stored as JSON, with expression indexes for performance
-- **Schema Validation** - Type checking on create and update (strict by default)
+- **Schema Validation** - JSON Schema subset with type checking, constraints, defaults, and optional fields
 - **COW Versioning** - Updates create new versions by default; full history preserved
 - **Links** - Cross-reference any artifact to any other with typed relations (auto-deleted with CASCADE)
 
@@ -36,11 +36,23 @@ Artistry.open("myapp.db")
 
 ### Register Artifact Kinds
 
+Schemas use a JSON Schema subset (powered by the [Jargon](https://github.com/trans/jargon) library):
+
 ```crystal
 Artistry::Registry.register(
   kind: "event",
   plugin: "myapp",
-  schema: {title: "string", date: "string", priority: "integer"},
+  schema: {
+    type: "object",
+    properties: {
+      title:    {type: "string", minLength: 1},
+      date:     {type: "string", format: "date"},
+      priority: {type: "integer", minimum: 1, maximum: 5},
+      status:   {type: "string", enum: ["draft", "confirmed"], default: "draft"},
+    },
+    required: ["title", "date"],
+    additionalProperties: false,
+  },
   description: "Calendar events",
   symbol: "📅",                 # optional emoji for display
   index: ["title", "date"]      # creates expression indexes
@@ -48,50 +60,49 @@ Artistry::Registry.register(
 # => "E" (assigned code)
 ```
 
-### Schema Types
+### Supported Schema Keywords
 
-Supported types for schema validation:
+| Category | Keywords |
+|----------|----------|
+| **Type** | `type` (`string`, `integer`, `number`, `boolean`, `array`, `object`, `null`) |
+| **Object** | `properties`, `required`, `additionalProperties` |
+| **String** | `minLength`, `maxLength`, `pattern`, `format` |
+| **Number** | `minimum`, `maximum`, `exclusiveMinimum`, `exclusiveMaximum`, `multipleOf` |
+| **Array** | `items`, `minItems`, `maxItems`, `uniqueItems` |
+| **General** | `enum`, `const`, `default`, `description` |
+| **Composition** | `$ref`, `$defs` |
 
-| Type | Description |
-|------|-------------|
-| `"string"` | JSON string |
-| `"integer"` | JSON integer |
-| `"float"` | JSON float |
-| `"number"` | integer or float |
-| `"boolean"` | JSON boolean |
-| `"array"` | JSON array |
-| `"object"` | JSON object |
-| `"any"` | any value (skip type check) |
-
-All schema fields are required. Unknown fields are rejected by default (strict mode).
+Fields listed in `required` must be present. Fields not in `required` are optional. Use `default` to provide fallback values (applied on create and update, stored in artifact data). Set `additionalProperties: false` to reject unknown fields.
 
 ### Create Artifacts
 
 ```crystal
+# status defaults to "draft", priority is optional
 event = Artistry::Artifact.create("event", {
   title: "Team Meeting",
-  date: "2025-06-15T10:00:00Z",
-  priority: 1
+  date: "2025-06-15",
 })
 
 event.slug       # => "E1"
 event.id         # => 1
 event["title"]   # => "Team Meeting" (as JSON::Any)
+event["status"]  # => "draft" (applied from default)
 ```
 
 ### Validation
 
 ```crystal
 # Invalid type - raises ValidationError
-Artistry::Artifact.create("event", {title: 123, ...})
-# => ValidationError: title: expected string, got integer
+Artistry::Artifact.create("event", {title: 123, date: "2025-06-15"})
+# => ValidationError: title: expected String, got Int64
 
-# Unknown field - rejected by default
-Artistry::Artifact.create("event", {title: "Test", ..., extra: "x"})
-# => ValidationError: extra: unknown field
+# Constraint violation
+Artistry::Artifact.create("event", {title: "", date: "2025-06-15"})
+# => ValidationError: title: must be at least 1 characters
 
-# Allow unknown fields with strict: false
-Artistry::Artifact.create("event", data, strict: false)
+# Unknown field rejected (when additionalProperties: false)
+Artistry::Artifact.create("event", {title: "Test", date: "2025-06-15", extra: "x"})
+# => ValidationError: extra: additionalProperties is false
 ```
 
 ### Query
@@ -115,7 +126,7 @@ Artistry::Artifact.where("E", priority: 1)
 Creates a new version, supersedes the old:
 
 ```crystal
-v1 = Artistry::Artifact.create("event", {title: "Draft", ...})
+v1 = Artistry::Artifact.create("event", {title: "Draft", date: "2025-06-15"})
 v2 = v1.update({title: "Final"})
 
 v1.superseded?   # => true
@@ -138,7 +149,7 @@ artifact.updated_at  # => unix milliseconds (Int64)
 Links use `rel` (relation) to describe the relationship type:
 
 ```crystal
-event = Artistry::Artifact.create("event", {title: "Meeting", ...})
+event = Artistry::Artifact.create("event", {title: "Meeting", date: "2025-06-15"})
 person = Artistry::Artifact.create("person", {name: "Alice"})
 
 # Create link with relation type

@@ -8,7 +8,7 @@ require "./artistry/tag"
 require "./artistry/transaction"
 
 module Artistry
-  VERSION = "0.8.1"
+  VERSION = "0.9.0"
 
   class_property db_path : String = "artistry.db"
   class_getter! db : DB::Database
