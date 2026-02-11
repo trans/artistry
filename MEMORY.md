@@ -26,6 +26,9 @@ Format is `{CODE}{ID}` with no separator, e.g., `E42` not `E:42`. The colon was 
 ### Schema Validation (JSON Schema)
 Schemas use a JSON Schema subset (powered by the Jargon library). Validation is always enabled (no opt-out). Schemas control strictness via `additionalProperties: false`. Optional fields and defaults are supported natively.
 
+### Owned vs Borrowed Connections
+`Artistry.open("path.db")` creates and owns the connection — `close` shuts it down. `Artistry.open(existing_db)` borrows an external connection — `close` detaches without closing it. Tracked internally via `@@owns_db`. This lets host apps (e.g. Copious) share a single SQLite connection with Artistry.
+
 ### Timestamps
 All timestamps (`created_at`, `updated_at`) are stored as INTEGER (unix epoch milliseconds) for performance. Convert with `Time.unix_ms(timestamp)` in Crystal or `datetime(ts/1000, 'unixepoch')` in SQL.
 
