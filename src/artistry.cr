@@ -1,4 +1,5 @@
 require "sqlite3"
+require "./artistry/errors"
 require "./artistry/database"
 require "./artistry/validator"
 require "./artistry/registry"
@@ -8,7 +9,7 @@ require "./artistry/tag"
 require "./artistry/transaction"
 
 module Artistry
-  VERSION = "0.10.0"
+  VERSION = "0.11.0"
 
   class_property db_path : String = "artistry.db"
   class_getter! db : DB::Database

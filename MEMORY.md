@@ -30,6 +30,15 @@ per-code `kind_seq` from the `kind_counter` table (`Artistry.next_kind_seq`).
 These changes were first made by hand in Copious's installed `lib/artistry`
 (Feb 2026) and upstreamed here in Oct 2026.
 
+### Declared Codes (0.11.0)
+A host's plugins load in varying order, so allocated codes ("shortest free
+prefix") could differ between databases. `Registry.register(..., code: "AS")`
+declares a kind's code instead. Errors: `InvalidCode` (not 1–2 uppercase
+letters), `CodeConflict` (another kind owns it), `CodeMismatch` (this kind is
+already registered under another code). Allocated codes are also capped at
+two letters (first letter, then first + a later letter, then first + A–Z),
+since slug parsing assumes 1–2 letter codes.
+
 ### Schema Validation (JSON Schema)
 Schemas use a JSON Schema subset (powered by the Jargon library). Validation is always enabled (no opt-out). Schemas control strictness via `additionalProperties: false`. Optional fields and defaults are supported natively.
 

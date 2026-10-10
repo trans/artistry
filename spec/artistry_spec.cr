@@ -96,6 +96,71 @@ describe Artistry do
       indexes.should contain("idx_memo_event_title")
       indexes.should contain("idx_memo_event_date")
     end
+
+    describe "declared codes" do
+      it "honors a declared code even when a shorter one is free" do
+        code = Artistry::Registry.register(kind: "assumption", plugin: "justice", schema: {type: "object"}, code: "AS")
+        code.should eq("AS")
+        Artistry::Registry.find("AS").not_nil!.kind.should eq("assumption")
+      end
+
+      it "is idempotent when re-registered with or without the code" do
+        Artistry::Registry.register(kind: "claim", plugin: "justice", schema: {type: "object"}, code: "C")
+        Artistry::Registry.register(kind: "claim", plugin: "justice", schema: {type: "object"}, code: "C").should eq("C")
+        Artistry::Registry.register(kind: "claim", plugin: "justice", schema: {type: "object"}).should eq("C")
+      end
+
+      it "doesn't depend on registration order" do
+        Artistry::Registry.register(kind: "citation", plugin: "memory", schema: {type: "object"}, code: "CI")
+        Artistry::Registry.register(kind: "claim", plugin: "justice", schema: {type: "object"}, code: "C").should eq("C")
+      end
+
+      it "raises CodeConflict naming both owners" do
+        Artistry::Registry.register(kind: "citation", plugin: "memory", schema: {type: "object"}, code: "C")
+        ex = expect_raises(Artistry::CodeConflict) do
+          Artistry::Registry.register(kind: "claim", plugin: "justice", schema: {type: "object"}, code: "C")
+        end
+        ex.message.not_nil!.should contain("justice/claim")
+        ex.message.not_nil!.should contain("memory/citation")
+        ex.owner_plugin.should eq("memory")
+      end
+
+      it "raises CodeMismatch when a registered kind declares a different code" do
+        Artistry::Registry.register(kind: "assumption", plugin: "justice", schema: {type: "object"})
+        ex = expect_raises(Artistry::CodeMismatch) do
+          Artistry::Registry.register(kind: "assumption", plugin: "justice", schema: {type: "object"}, code: "AS")
+        end
+        ex.registered_code.should eq("A")
+        ex.declared_code.should eq("AS")
+      end
+
+      it "rejects codes that aren't one or two uppercase letters" do
+        ["", "abc", "ABC", "a", "A1", "Q-"].each do |bad|
+          expect_raises(Artistry::InvalidCode) do
+            Artistry::Registry.register(kind: "question", plugin: "justice", schema: {type: "object"}, code: bad)
+          end
+        end
+      end
+    end
+
+    describe "allocated codes" do
+      it "stays within two letters" do
+        codes = %w(definition design decide decision deliverable).map do |kind|
+          Artistry::Registry.register(kind: kind, plugin: "p", schema: {type: "object"})
+        end
+        codes.should eq(["D", "DE", "DC", "DI", "DL"])
+        codes.each { |c| c.size.should be <= 2 }
+      end
+
+      it "raises when every code for the first letter is taken" do
+        (["Z"] + ('A'..'Z').map { |c| "Z#{c}" }).each_with_index do |c, i|
+          Artistry::Registry.register(kind: "k#{i}", plugin: "p", schema: {type: "object"}, code: c)
+        end
+        expect_raises(Artistry::Error, /No free code/) do
+          Artistry::Registry.register(kind: "zebra", plugin: "p", schema: {type: "object"})
+        end
+      end
+    end
   end
 
   describe Artistry::Artifact do

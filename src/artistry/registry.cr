@@ -13,20 +13,31 @@ module Artistry
     def initialize(@code, @kind, @plugin, @description, @symbol, @version)
     end
 
+    CODE_FORMAT = /\A[A-Z]{1,2}\z/
+
     # Register a new artifact kind. Returns the assigned code.
     # Schema can be any JSON-serializable value.
     # Index is a list of field names to create expression indexes on.
+    #
+    # `code` declares the kind's code (one or two uppercase letters) so it
+    # doesn't depend on registration order. Without it, a code is allocated
+    # from the kind name. Raises `InvalidCode`, `CodeConflict` (another kind
+    # owns the code) or `CodeMismatch` (this kind is already registered
+    # under a different code).
     def self.register(
       kind : String,
       plugin : String,
       schema,
       description : String? = nil,
       symbol : String? = nil,
-      index : Array(String) = [] of String
+      index : Array(String) = [] of String,
+      code : String? = nil
     ) : String
       db = Artistry.conn
       kind = kind.downcase
       plugin = plugin.downcase
+      declared = code
+      raise InvalidCode.new(declared) if declared && !CODE_FORMAT.matches?(declared)
 
       # Check if already registered
       existing = db.query_one?(
@@ -37,6 +48,10 @@ module Artistry
 
       if existing
         code, current_version = existing
+        if declared && declared != code
+          raise CodeMismatch.new(plugin, kind, code, declared)
+        end
+
         # Check if schema changed
         schema_json = normalize_schema(schema)
         schema_hash = hash_schema(schema_json)
@@ -66,8 +81,15 @@ module Artistry
         return code
       end
 
-      # New registration - find available code
-      code = allocate_code(db, kind)
+      # New registration - use the declared code, or allocate one
+      code = if declared
+               if owner = db.query_one?("SELECT plugin, kind FROM registry WHERE code = ?", declared, as: {String, String})
+                 raise CodeConflict.new(declared, plugin, kind, owner[0], owner[1])
+               end
+               declared
+             else
+               allocate_code(db, kind)
+             end
 
       db.exec(
         "INSERT INTO registry (code, kind, plugin, description, symbol, version) VALUES (?, ?, ?, ?, ?, 1)",
@@ -99,12 +121,21 @@ module Artistry
       end
     end
 
-    # Find the shortest unique prefix for a kind name
+    # Allocate a free one- or two-letter code for a kind name.
+    #
+    # Tries the first letter, then the first letter followed by each later
+    # letter of the name, then the first letter followed by A-Z. Codes are
+    # capped at two letters because slugs ("C42", "42C") are parsed that way.
     def self.allocate_code(db, kind : String) : String
-      kind_upper = kind.upcase
+      letters = kind.upcase.gsub(/[^A-Z]/, "")
+      raise Error.new("Cannot allocate a code for kind #{kind.inspect}: it has no letters") if letters.empty?
 
-      (1..kind_upper.size).each do |len|
-        candidate = kind_upper[0, len]
+      first = letters[0]
+      candidates = [first.to_s]
+      letters[1..].each_char { |c| candidates << "#{first}#{c}" }
+      ('A'..'Z').each { |c| candidates << "#{first}#{c}" }
+
+      candidates.uniq.each do |candidate|
         exists = db.query_one?(
           "SELECT 1 FROM registry WHERE code = ?",
           candidate,
@@ -113,18 +144,7 @@ module Artistry
         return candidate unless exists
       end
 
-      # Fallback: append number if full name is taken
-      suffix = 1
-      loop do
-        candidate = "#{kind_upper}#{suffix}"
-        exists = db.query_one?(
-          "SELECT 1 FROM registry WHERE code = ?",
-          candidate,
-          as: Int32
-        )
-        return candidate unless exists
-        suffix += 1
-      end
+      raise Error.new("No free code for kind #{kind.inspect}: all codes starting with #{first} are taken (declare one with code:)")
     end
 
     def self.normalize_schema(schema) : String
