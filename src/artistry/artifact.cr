@@ -11,9 +11,10 @@ module Artistry
     getter created_at : Int64
     getter new_id : Int64?
     getter updated_at : Int64?
+    getter kind_seq : Int64?
 
     def initialize(@id, @code, @version, @data, @hash, @created_at,
-                   @new_id = nil, @updated_at = nil)
+                   @new_id = nil, @updated_at = nil, @kind_seq = nil)
     end
 
     def self.hash_data(data_json : String) : String
@@ -40,8 +41,12 @@ module Artistry
 
       data_json = data_parsed.to_json
 
-      # Create identity
-      db.exec("INSERT INTO identity DEFAULT VALUES")
+      # Create identity with code and kind_seq
+      seq = Artistry.next_kind_seq(reg.code)
+      db.exec(
+        "INSERT INTO identity (code, kind_seq) VALUES (?, ?)",
+        reg.code, seq
+      )
       id = db.scalar("SELECT last_insert_rowid()").as(Int64)
 
       # Create artifact
@@ -57,7 +62,8 @@ module Artistry
         as: Int64
       )
 
-      Artifact.new(id, reg.code, reg.version, data_parsed, data_hash, created_at)
+      Artifact.new(id, reg.code, reg.version, data_parsed, data_hash, created_at,
+                   kind_seq: seq)
     end
 
     # Create via plugin and kind names
@@ -79,7 +85,10 @@ module Artistry
       create_with_registry(reg, data)
     end
 
-    # Build artifact from database row
+    FIND_COLUMNS = "a.id, a.code, a.version, a.data, a.hash, i.created_at, " \
+                   "a.new_id, a.updated_at, i.kind_seq"
+
+    # Build artifact from database row (9 columns with kind_seq)
     private def self.from_row(row : Tuple) : Artifact
       Artifact.new(
         row[0].as(Int64),
@@ -89,52 +98,70 @@ module Artistry
         row[4].as(String),
         row[5].as(Int64),
         row[6].as(Int64?),
-        row[7].as(Int64?)
+        row[7].as(Int64?),
+        row[8].as(Int64?)
       )
     end
 
     # Find by ID
     def self.find(id : Int64) : Artifact?
       row = Artistry.conn.query_one?(
-        "SELECT a.id, a.code, a.version, a.data, a.hash, i.created_at,
-                a.new_id, a.updated_at
-         FROM artifact a
+        "SELECT #{FIND_COLUMNS} FROM artifact a
          JOIN identity i ON a.id = i.id
          WHERE a.id = ?",
         id,
-        as: {Int64, String, Int32, String, String, Int64, Int64?, Int64?}
+        as: {Int64, String, Int32, String, String, Int64, Int64?, Int64?, Int64?}
       )
       return nil unless row
       from_row(row)
     end
 
-    # Find by slug (e.g., "E42", "EV123")
+    # Find by slug — supports both absolute (C99) and kind-relative (99C).
     def self.find(slug : String) : Artifact?
-      # Split where letters end and digits begin
-      match = slug.match(/^([A-Z]+)(\d+)$/i)
-      return nil unless match
-      code = match[1].upcase
-      id = match[2].to_i64?
+      # Try absolute: C99, Q7, AS42 (letters then digits)
+      if match = slug.match(/^([A-Z]{1,2})(\d+)$/i)
+        code = match[1].upcase
+        id = match[2].to_i64?
+        if id
+          artifact = find(id)
+          return artifact if artifact && artifact.code == code
+        end
+      end
+
+      # Try kind-relative: 99C, 7Q, 42AS (digits then letters)
+      if match = slug.match(/^(\d+)([A-Z]{1,2})$/i)
+        seq = match[1].to_i64?
+        code = match[2].upcase
+        return find_by_kind_seq(code, seq) if seq
+      end
+
+      nil
+    end
+
+    # Find by kind-relative sequence number.
+    #
+    # Looks up the identity with the given code and kind_seq,
+    # then returns the artifact at that identity.
+    def self.find_by_kind_seq(code : String, seq : Int64) : Artifact?
+      id = Artistry.conn.query_one?(
+        "SELECT id FROM identity WHERE code = ? AND kind_seq = ?",
+        code, seq,
+        as: Int64
+      )
       return nil unless id
-      artifact = find(id)
-      return nil unless artifact && artifact.code == code
-      artifact
+      find(id)
     end
 
     # Query artifacts by code (current versions only by default)
     def self.where(code : String, include_superseded : Bool = false) : Array(Artifact)
       results = [] of Artifact
       sql = if include_superseded
-              "SELECT a.id, a.code, a.version, a.data, a.hash, i.created_at,
-                      a.new_id, a.updated_at
-               FROM artifact a
+              "SELECT #{FIND_COLUMNS} FROM artifact a
                JOIN identity i ON a.id = i.id
                WHERE a.code = ?
                ORDER BY a.id"
             else
-              "SELECT a.id, a.code, a.version, a.data, a.hash, i.created_at,
-                      a.new_id, a.updated_at
-               FROM artifact a
+              "SELECT #{FIND_COLUMNS} FROM artifact a
                JOIN identity i ON a.id = i.id
                WHERE a.code = ? AND a.new_id IS NULL
                ORDER BY a.id"
@@ -149,6 +176,7 @@ module Artistry
             JSON.parse(rs.read(String)),
             rs.read(String),
             rs.read(Int64),
+            rs.read(Int64?),
             rs.read(Int64?),
             rs.read(Int64?)
           )
@@ -171,8 +199,7 @@ module Artistry
       end
 
       sql = <<-SQL
-        SELECT a.id, a.code, a.version, a.data, a.hash, i.created_at,
-               a.new_id, a.updated_at
+        SELECT #{FIND_COLUMNS}
         FROM artifact a
         JOIN identity i ON a.id = i.id
         WHERE #{where_clauses.join(" AND ")}
@@ -190,6 +217,7 @@ module Artistry
             rs.read(String),
             rs.read(Int64),
             rs.read(Int64?),
+            rs.read(Int64?),
             rs.read(Int64?)
           )
         end
@@ -197,9 +225,15 @@ module Artistry
       results
     end
 
-    # Slug representation (e.g., "E1", "EV42")
+    # Absolute slug (e.g., "E1", "C42")
     def slug : String
       "#{code}#{id}"
+    end
+
+    # Kind-relative slug (e.g., "1E", "42C")
+    def kind_slug : String?
+      ks = kind_seq
+      ks ? "#{ks}#{code}" : nil
     end
 
     # Is this the current (non-superseded) version?
@@ -297,8 +331,12 @@ module Artistry
       data_json = merged_parsed.to_json
       data_hash = Artifact.hash_data(data_json)
 
-      # Create new identity for new version
-      db.exec("INSERT INTO identity DEFAULT VALUES")
+      # Create new identity with new kind_seq
+      seq = Artistry.next_kind_seq(code)
+      db.exec(
+        "INSERT INTO identity (code, kind_seq) VALUES (?, ?)",
+        code, seq
+      )
       new_id = db.scalar("SELECT last_insert_rowid()").as(Int64)
 
       # Create new artifact
@@ -319,7 +357,8 @@ module Artistry
         as: Int64
       )
 
-      Artifact.new(new_id, code, current_version, merged_parsed, data_hash, new_created_at)
+      Artifact.new(new_id, code, current_version, merged_parsed, data_hash, new_created_at,
+                   kind_seq: seq)
     end
 
     # Mutable update - modifies in place, sets updated_at
@@ -356,7 +395,7 @@ module Artistry
       )
 
       Artifact.new(id, code, current_version, merged_parsed, data_hash, created_at,
-                   new_id, now)
+                   new_id, now, kind_seq)
     end
 
     # Delete artifact (hard delete)

@@ -3,8 +3,17 @@ module Artistry
     SCHEMA = <<-SQL
       CREATE TABLE IF NOT EXISTS identity (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT,
+        kind_seq INTEGER,
         created_at INTEGER NOT NULL DEFAULT (cast((julianday('now') - 2440587.5) * 86400000 as integer))
       );
+
+      CREATE TABLE IF NOT EXISTS kind_counter (
+        code TEXT PRIMARY KEY,
+        next_seq INTEGER NOT NULL DEFAULT 0
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_identity_kind_seq ON identity(code, kind_seq);
 
       CREATE TABLE IF NOT EXISTS registry (
         code TEXT PRIMARY KEY,
@@ -71,6 +80,11 @@ module Artistry
         stmt = stmt.strip
         next if stmt.empty?
         db.exec(stmt)
+      end
+
+      # Add columns to existing identity tables (idempotent)
+      {"code TEXT", "kind_seq INTEGER"}.each do |col|
+        db.exec("ALTER TABLE identity ADD COLUMN #{col}") rescue nil
       end
     end
   end

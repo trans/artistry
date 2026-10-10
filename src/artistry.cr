@@ -61,6 +61,20 @@ module Artistry
     @@tx_connections[Fiber.current]? || db
   end
 
+  # Atomically allocate the next kind_seq for a given artifact code.
+  #
+  # Inserts or increments the counter in `kind_counter`, then returns
+  # the new sequence number. Thread-safe via SQLite's write lock.
+  def self.next_kind_seq(code : String) : Int64
+    c = conn
+    c.exec(
+      "INSERT INTO kind_counter (code, next_seq) VALUES (?, 1) " \
+      "ON CONFLICT(code) DO UPDATE SET next_seq = next_seq + 1",
+      code
+    )
+    c.scalar("SELECT next_seq FROM kind_counter WHERE code = ?", code).as(Int64)
+  end
+
   def self.transaction(&block)
     db.using_connection do |conn|
       @@tx_connections[Fiber.current] = conn
