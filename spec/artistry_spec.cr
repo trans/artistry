@@ -981,4 +981,77 @@ describe Artistry do
       end
     end
   end
+
+  describe "kind_seq" do
+    before_each do
+      Artistry::Registry.register(
+        kind: "event", plugin: "memo",
+        schema: simple_schema({title: {type: "string"}}))
+      Artistry::Registry.register(
+        kind: "contact", plugin: "memo",
+        schema: simple_schema({name: {type: "string"}}))
+    end
+
+    it "counts sequence numbers per code" do
+      Artistry.next_kind_seq("X").should eq(1)
+      Artistry.next_kind_seq("X").should eq(2)
+      Artistry.next_kind_seq("Y").should eq(1)
+    end
+
+    it "stamps code and kind_seq on create" do
+      e1 = Artistry::Artifact.create("E", {title: "a"})
+      c1 = Artistry::Artifact.create("C", {name: "b"})
+      e2 = Artistry::Artifact.create("E", {title: "c"})
+
+      e1.kind_seq.should eq(1)
+      c1.kind_seq.should eq(1)
+      e2.kind_seq.should eq(2)
+      e2.kind_slug.should eq("2E")
+
+      Artistry.conn.query_one("SELECT code FROM identity WHERE id = ?", e2.id, as: String).should eq("E")
+    end
+
+    it "gives an updated version the next kind_seq" do
+      e1 = Artistry::Artifact.create("E", {title: "a"})
+      e2 = e1.update({title: "b"})
+      e2.kind_seq.should eq(2)
+      e2.kind_slug.should eq("2E")
+    end
+
+    it "finds by absolute and kind-relative slugs" do
+      Artistry::Artifact.create("C", {name: "x"})
+      e = Artistry::Artifact.create("E", {title: "a"})
+
+      Artistry::Artifact.find(e.slug).not_nil!.id.should eq(e.id)
+      Artistry::Artifact.find("1E").not_nil!.id.should eq(e.id)
+      Artistry::Artifact.find("1e").not_nil!.id.should eq(e.id)
+      Artistry::Artifact.find("2E").should be_nil
+      Artistry::Artifact.find("E#{e.id + 100}").should be_nil
+    end
+
+    it "upgrades an identity table created before kind_seq" do
+      db = DB.open("sqlite3:%3Amemory%3A")
+      db.exec(<<-SQL)
+        CREATE TABLE identity (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          created_at INTEGER NOT NULL DEFAULT 0
+        )
+        SQL
+      db.exec("INSERT INTO identity DEFAULT VALUES")
+
+      Artistry.open(db)
+
+      columns = db.query_all("SELECT name FROM pragma_table_info('identity')", as: String)
+      columns.should contain("code")
+      columns.should contain("kind_seq")
+      db.query_one?("SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'idx_identity_kind_seq'", as: String)
+        .should eq("idx_identity_kind_seq")
+
+      # Running ensure_schema again is a no-op
+      Artistry::Database.ensure_schema(db)
+    ensure
+      Artistry.close
+      db.try &.close
+    end
+  end
 end

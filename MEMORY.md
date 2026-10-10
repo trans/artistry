@@ -23,6 +23,13 @@ We went with "link" terminology (not "edge") because of the hyperlink metaphor t
 ### Slugs
 Format is `{CODE}{ID}` with no separator, e.g., `E42` not `E:42`. The colon was deemed unnecessary.
 
+Kind-relative slugs (0.10.0) flip the order: `{SEQ}{CODE}`, e.g. `2E` is the
+second artifact with code `E`. Each identity row records its `code` and a
+per-code `kind_seq` from the `kind_counter` table (`Artistry.next_kind_seq`).
+`Artifact.find(slug)` accepts both forms; slug parsing assumes 1–2 letter codes.
+These changes were first made by hand in Copious's installed `lib/artistry`
+(Feb 2026) and upstreamed here in Oct 2026.
+
 ### Schema Validation (JSON Schema)
 Schemas use a JSON Schema subset (powered by the Jargon library). Validation is always enabled (no opt-out). Schemas control strictness via `additionalProperties: false`. Optional fields and defaults are supported natively.
 

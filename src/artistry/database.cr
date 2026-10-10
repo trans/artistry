@@ -13,8 +13,6 @@ module Artistry
         next_seq INTEGER NOT NULL DEFAULT 0
       );
 
-      CREATE INDEX IF NOT EXISTS idx_identity_kind_seq ON identity(code, kind_seq);
-
       CREATE TABLE IF NOT EXISTS registry (
         code TEXT PRIMARY KEY,
         kind TEXT NOT NULL,
@@ -82,10 +80,16 @@ module Artistry
         db.exec(stmt)
       end
 
-      # Add columns to existing identity tables (idempotent)
-      {"code TEXT", "kind_seq INTEGER"}.each do |col|
-        db.exec("ALTER TABLE identity ADD COLUMN #{col}") rescue nil
+      # Add columns to identity tables created before kind_seq existed.
+      # Checked rather than rescued: a failed ALTER leaves a cached
+      # statement in an error state that raises when the DB is closed.
+      existing = db.query_all("SELECT name FROM pragma_table_info('identity')", as: String)
+      {"code" => "TEXT", "kind_seq" => "INTEGER"}.each do |column, type|
+        db.exec("ALTER TABLE identity ADD COLUMN #{column} #{type}") unless existing.includes?(column)
       end
+
+      # Created after the ALTERs so it also works on pre-kind_seq tables.
+      db.exec("CREATE INDEX IF NOT EXISTS idx_identity_kind_seq ON identity(code, kind_seq)")
     end
   end
 end
