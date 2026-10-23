@@ -20,10 +20,11 @@ behavior; the user asked for this one to go to them (2026-10-23).
   error text. Nothing blocks the upgrade. ipck's own CLI also depends on
   jargon (`~> 0.16.0`) directly, and ipck will move that to 0.22 when it
   takes artistry 0.12.
-- **Pending, not yet told:** ipck can't take an artistry or memo release
-  that uses jargon's new source until both have one, and then has to
-  switch its own jargon line too (see status.md). @ipck hasn't been told:
-  it waits on the user's choice of where to tag `v0.12.0`.
+- **2026-10-23, 0.12.0 and jargon's new source.** Told @ipck (sent as
+  @artistry, `mail/sent/`) that 0.12.0 names jargon's new source: stay on
+  artistry 0.11.0 until memo releases with the new source too, then take
+  both and switch ipck's own jargon line and lock URLs in the same change.
+  Asked it to reply to @artistry from now on. **Waiting on memo's release.**
 
 ## @jargon
 

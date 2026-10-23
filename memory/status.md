@@ -4,21 +4,15 @@
 
 ## 0.12.0: Jargon 0.22
 
-- **Committed in `8496f93`, not tagged.** Jargon moved from `~> 0.16.0` to
+- **Released: `v0.12.0` on `674a781`** (2026-10-23). Jargon moved from `~> 0.16.0` to
   `~> 0.22.1` (it resolves to 0.22.2), validation got stricter, and
   `Registry.register` now raises `InvalidSchema`. The project's MEMORY.md
   ("Jargon 0.22") lists the behavior changes.
-- The user said to commit and bump the version but not tag yet
-  (2026-10-23). The only thing tagging was waiting on, @ipck's check of its
-  databases, came back clean that day (see [coordination.md](coordination.md)).
-  So `v0.12.0` waits only on the user's go-ahead.
-- **Where to tag:** `674a781`, after the upgrade, switched jargon's source
-  to `openbohemians/jargon.cr` (below). ipck can't take a release with that
-  source until memo publishes one too. Tagging `v0.12.0` at `183a05f`
-  (still `trans/jargon`) lets ipck take the jargon 0.22 upgrade now; the
-  source switch would follow in a later release, in step with memo's.
-  Not decided yet (2026-10-23).
-- `main` is pushed through `674a781` (2026-10-23).
+- @ipck's check of its databases came back clean before the release (see
+  [coordination.md](coordination.md)).
+- The user chose to tag `main`, so 0.12.0 already names jargon's new
+  source (2026-10-23). ipck can't take it until memo publishes a release
+  with the new source too (below).
 
 ## Open
 
