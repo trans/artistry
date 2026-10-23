@@ -12,16 +12,32 @@
   (2026-10-23). The only thing tagging was waiting on, @ipck's check of its
   databases, came back clean that day (see [coordination.md](coordination.md)).
   So `v0.12.0` waits only on the user's go-ahead.
-- `main` (`8496f93`, `183a05f`) was not pushed as of 2026-10-23.
+- **Where to tag:** `674a781`, after the upgrade, switched jargon's source
+  to `openbohemians/jargon.cr` (below). ipck can't take a release with that
+  source until memo publishes one too. Tagging `v0.12.0` at `183a05f`
+  (still `trans/jargon`) lets ipck take the jargon 0.22 upgrade now; the
+  source switch would follow in a later release, in step with memo's.
+  Not decided yet (2026-10-23).
+- `main` is pushed through `674a781` (2026-10-23).
 
 ## Open
 
 - **Jargon's repository moved** from `trans/jargon` to
-  `openbohemians/jargon.cr`. The old URL redirects, and every project of the
-  user's that depends on jargon, artistry included, still says
-  `github: trans/jargon`. Switch them all at once, or not at all: a project
-  that pulls jargon in under both names (ipck does, through artistry and
-  memo) fails `shards install` with "ambiguous sources".
+  `openbohemians/jargon.cr` (the old URL redirects). The user had every
+  project's `shard.yml` switched (2026-10-23). shards fails with "ambiguous
+  sources" when one build sees jargon under both names, and it reads a
+  dependency's `shard.yml` from the version it resolves, not from a local
+  checkout.
+  - **Switched and pushed:** artistry `674a781`, memo `fa6ed05`, microgpt
+    `e657283`, cyclops `5df416f`, transfs `18a4198`, xerp `0e77866`,
+    c0-fmt `564ea44`. Each lock keeps its jargon version; only the URL
+    changed.
+  - **Held, because switching now breaks their install:** ipck (gets
+    jargon through released artistry and memo: switch when it takes
+    releases of both that use the new source), agpt and agpt-slot-selection
+    (lock microgpt at `bdd8e82`, still the old source: switch when they
+    next update microgpt's `main`), finfry (through keep's c0 0.10.1: switch
+    when it moves to c0 0.11, which no longer depends on jargon).
 - **Formatting:** `crystal tool format --check` flags lines older than
   `8496f93`: `src/artistry/artifact.cr`, the `code` parameter's trailing
   comma in `Registry.register`, and two aligned keys in the spec. Left
