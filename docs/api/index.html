@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Crystal Docs 1.19.1">
-<meta name="crystal_docs.project_version" content="0.9.0-dev">
+<meta name="generator" content="Crystal Docs 1.22.0">
+<meta name="crystal_docs.project_version" content="0.12.0">
 <meta name="crystal_docs.project_name" content="artistry">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="js/doc.js"></script>
 
   <meta name="repository-name" content="artistry">
-  <title>artistry 0.9.0-dev</title>
+  <title>artistry 0.12.0</title>
   <script type="text/javascript">
   CrystalDocs.base_path = "";
   </script>
@@ -45,7 +45,7 @@
       </h1>
 
       <span class="project-version">
-        0.9.0-dev
+        0.12.0
       </span>
     </div>
   </div>
@@ -67,8 +67,33 @@
       
     </li>
   
+  <li class=" " data-id="artistry/Artistry/CodeConflict" data-name="artistry::codeconflict">
+      <a href="Artistry/CodeConflict.html">CodeConflict</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/CodeMismatch" data-name="artistry::codemismatch">
+      <a href="Artistry/CodeMismatch.html">CodeMismatch</a>
+      
+    </li>
+  
   <li class=" " data-id="artistry/Artistry/Database" data-name="artistry::database">
       <a href="Artistry/Database.html">Database</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Error" data-name="artistry::error">
+      <a href="Artistry/Error.html">Error</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidCode" data-name="artistry::invalidcode">
+      <a href="Artistry/InvalidCode.html">InvalidCode</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidSchema" data-name="artistry::invalidschema">
+      <a href="Artistry/InvalidSchema.html">InvalidSchema</a>
       
     </li>
   
@@ -208,7 +233,8 @@
 | <strong>Array</strong> | <code>items</code>, <code>minItems</code>, <code>maxItems</code>, <code>uniqueItems</code> |
 | <strong>General</strong> | <code>enum</code>, <code>const</code>, <code>default</code>, <code>description</code> |
 | <strong>Composition</strong> | <code>$ref</code>, <code>$defs</code> |</p>
-<p>Fields listed in <code>required</code> must be present. Fields not in <code>required</code> are optional. Use <code>default</code> to provide fallback values (applied on create and update, stored in artifact data). Set <code>additionalProperties: false</code> to reject unknown fields.</p>
+<p>Fields listed in <code>required</code> must be present. Fields not in <code>required</code> are optional. Use <code>default</code> to provide fallback values (applied on create and update, stored in artifact data). Set <code>additionalProperties: false</code> to reject unknown fields. An omitted <code>type</code> is inferred from <code>properties</code> (object) or <code>items</code> (array).</p>
+<p>A schema that can't be parsed, such as one declaring <code>type: &quot;string&quot;</code> alongside <code>properties</code>, or with an invalid <code>pattern</code>, raises <code><a href="Artistry/InvalidSchema.html">Artistry::InvalidSchema</a></code> at registration.</p>
 <h3><a id="create-artifacts" class="anchor" href="#create-artifacts">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
@@ -231,7 +257,7 @@ event[<span class="s">&quot;status&quot;</span>]  <span class="c"># =&gt; &quot;
 </a>Validation</h3>
 <pre><code class="language-crystal"><span class="c"># Invalid type - raises ValidationError</span>
 <span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.create(<span class="s">&quot;event&quot;</span>, {title: <span class="n">123</span>, date: <span class="s">&quot;2025-06-15&quot;</span>})
-<span class="c"># =&gt; ValidationError: title: expected String, got Int64</span>
+<span class="c"># =&gt; ValidationError: title: expected string, got integer</span>
 
 <span class="c"># Constraint violation</span>
 <span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.create(<span class="s">&quot;event&quot;</span>, {title: <span class="s">&quot;&quot;</span>, date: <span class="s">&quot;2025-06-15&quot;</span>})

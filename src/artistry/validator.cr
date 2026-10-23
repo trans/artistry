@@ -66,8 +66,10 @@ module Artistry
     private def self.parse_error(msg : String) : ValidationError::FieldError
       # Jargon error formats:
       #   "Missing required field: name"
-      #   "Invalid type for name: expected string, got Int64"
+      #   "Invalid type for name: expected string, got integer"
       #   "Value for name must be >= 1"
+      #   "Value for name must match pattern: ^a+$"
+      #   "Value for name could not be checked against pattern: ..."
       #   "Invalid value for name: must be one of a, b"
       #   "name must have at least 1 items"
       #   "Unknown property 'name': additionalProperties is false"
@@ -76,8 +78,8 @@ module Artistry
         ValidationError::FieldError.new($1, "required field missing")
       when /^Invalid type for (.+?): expected (.+?), got (.+)$/
         ValidationError::FieldError.new($1, "expected #{$2}, got #{$3}")
-      when /^Value for (.+?) must be (.+)$/
-        ValidationError::FieldError.new($1, "must be #{$2}")
+      when /^Value for (.+?) (must .+|could not .+)$/
+        ValidationError::FieldError.new($1, $2)
       when /^Invalid value for (.+?): must be one of (.+)$/
         ValidationError::FieldError.new($1, "must be one of #{$2}")
       when /^(.+?) must have (.+)$/

@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Crystal Docs 1.19.1">
-<meta name="crystal_docs.project_version" content="0.9.0-dev">
+<meta name="generator" content="Crystal Docs 1.22.0">
+<meta name="crystal_docs.project_version" content="0.12.0">
 <meta name="crystal_docs.project_name" content="artistry">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../js/doc.js"></script>
 
   <meta name="repository-name" content="artistry">
-  <title>Artistry::Database - artistry 0.9.0-dev</title>
+  <title>Artistry::Database - artistry 0.12.0</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../";
   </script>
@@ -45,7 +45,7 @@
       </h1>
 
       <span class="project-version">
-        0.9.0-dev
+        0.12.0
       </span>
     </div>
   </div>
@@ -67,8 +67,33 @@
       
     </li>
   
+  <li class=" " data-id="artistry/Artistry/CodeConflict" data-name="artistry::codeconflict">
+      <a href="../Artistry/CodeConflict.html">CodeConflict</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/CodeMismatch" data-name="artistry::codemismatch">
+      <a href="../Artistry/CodeMismatch.html">CodeMismatch</a>
+      
+    </li>
+  
   <li class=" current" data-id="artistry/Artistry/Database" data-name="artistry::database">
       <a href="../Artistry/Database.html">Database</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Error" data-name="artistry::error">
+      <a href="../Artistry/Error.html">Error</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidCode" data-name="artistry::invalidcode">
+      <a href="../Artistry/InvalidCode.html">InvalidCode</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidSchema" data-name="artistry::invalidschema">
+      <a href="../Artistry/InvalidSchema.html">InvalidSchema</a>
       
     </li>
   
@@ -181,7 +206,7 @@
   <dl>
     
       <dt class="entry-const" id="SCHEMA">
-        <strong>SCHEMA</strong> = <code><span class="s">&quot;  CREATE TABLE IF NOT EXISTS identity (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    created_at INTEGER NOT NULL DEFAULT (cast((julianday(&#39;now&#39;) - 2440587.5) * 86400000 as integer))\n  );\n\n  CREATE TABLE IF NOT EXISTS registry (\n    code TEXT PRIMARY KEY,\n    kind TEXT NOT NULL,\n    plugin TEXT NOT NULL,\n    description TEXT,\n    symbol TEXT,\n    version INTEGER NOT NULL DEFAULT 1,\n    UNIQUE(plugin, kind)\n  );\n\n  CREATE TABLE IF NOT EXISTS schema (\n    code TEXT NOT NULL,\n    version INTEGER NOT NULL,\n    json TEXT NOT NULL,\n    hash TEXT NOT NULL,\n    created_at INTEGER NOT NULL DEFAULT (cast((julianday(&#39;now&#39;) - 2440587.5) * 86400000 as integer)),\n    PRIMARY KEY (code, version),\n    FOREIGN KEY (code) REFERENCES registry(code)\n  );\n\n  CREATE TABLE IF NOT EXISTS artifact (\n    id INTEGER PRIMARY KEY,\n    code TEXT NOT NULL,\n    version INTEGER NOT NULL,\n    data JSON NOT NULL,\n    hash TEXT NOT NULL,\n    new_id INTEGER REFERENCES identity(id),\n    updated_at INTEGER,\n    FOREIGN KEY (id) REFERENCES identity(id),\n    FOREIGN KEY (code, version) REFERENCES schema(code, version)\n  );\n\n  CREATE INDEX IF NOT EXISTS idx_artifact_code ON artifact(code);\n  CREATE INDEX IF NOT EXISTS idx_artifact_new_id ON artifact(new_id);\n\n  CREATE TABLE IF NOT EXISTS link (\n    from_id INTEGER NOT NULL REFERENCES identity(id) ON DELETE CASCADE,\n    to_id INTEGER NOT NULL REFERENCES identity(id) ON DELETE CASCADE,\n    rel TEXT NOT NULL,\n    data JSON,\n    created_at INTEGER NOT NULL DEFAULT (cast((julianday(&#39;now&#39;) - 2440587.5) * 86400000 as integer)),\n    PRIMARY KEY (from_id, to_id, rel)\n  );\n\n  CREATE TABLE IF NOT EXISTS tag (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    name TEXT NOT NULL UNIQUE,\n    created_at INTEGER NOT NULL DEFAULT (cast((julianday(&#39;now&#39;) - 2440587.5) * 86400000 as integer))\n  );\n\n  CREATE TABLE IF NOT EXISTS tagging (\n    tag_id INTEGER NOT NULL REFERENCES tag(id) ON DELETE CASCADE,\n    artifact_id INTEGER NOT NULL REFERENCES identity(id) ON DELETE CASCADE,\n    created_at INTEGER NOT NULL DEFAULT (cast((julianday(&#39;now&#39;) - 2440587.5) * 86400000 as integer)),\n    PRIMARY KEY (tag_id, artifact_id)\n  );\n\n  CREATE INDEX IF NOT EXISTS idx_tagging_artifact_id ON tagging(artifact_id);&quot;</span></code>
+        <strong>SCHEMA</strong> = <code><span class="s">&quot;  CREATE TABLE IF NOT EXISTS identity (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    code TEXT,\n    kind_seq INTEGER,\n    created_at INTEGER NOT NULL DEFAULT (cast((julianday(&#39;now&#39;) - 2440587.5) * 86400000 as integer))\n  );\n\n  CREATE TABLE IF NOT EXISTS kind_counter (\n    code TEXT PRIMARY KEY,\n    next_seq INTEGER NOT NULL DEFAULT 0\n  );\n\n  CREATE TABLE IF NOT EXISTS registry (\n    code TEXT PRIMARY KEY,\n    kind TEXT NOT NULL,\n    plugin TEXT NOT NULL,\n    description TEXT,\n    symbol TEXT,\n    version INTEGER NOT NULL DEFAULT 1,\n    UNIQUE(plugin, kind)\n  );\n\n  CREATE TABLE IF NOT EXISTS schema (\n    code TEXT NOT NULL,\n    version INTEGER NOT NULL,\n    json TEXT NOT NULL,\n    hash TEXT NOT NULL,\n    created_at INTEGER NOT NULL DEFAULT (cast((julianday(&#39;now&#39;) - 2440587.5) * 86400000 as integer)),\n    PRIMARY KEY (code, version),\n    FOREIGN KEY (code) REFERENCES registry(code)\n  );\n\n  CREATE TABLE IF NOT EXISTS artifact (\n    id INTEGER PRIMARY KEY,\n    code TEXT NOT NULL,\n    version INTEGER NOT NULL,\n    data JSON NOT NULL,\n    hash TEXT NOT NULL,\n    new_id INTEGER REFERENCES identity(id),\n    updated_at INTEGER,\n    FOREIGN KEY (id) REFERENCES identity(id),\n    FOREIGN KEY (code, version) REFERENCES schema(code, version)\n  );\n\n  CREATE INDEX IF NOT EXISTS idx_artifact_code ON artifact(code);\n  CREATE INDEX IF NOT EXISTS idx_artifact_new_id ON artifact(new_id);\n\n  CREATE TABLE IF NOT EXISTS link (\n    from_id INTEGER NOT NULL REFERENCES identity(id) ON DELETE CASCADE,\n    to_id INTEGER NOT NULL REFERENCES identity(id) ON DELETE CASCADE,\n    rel TEXT NOT NULL,\n    data JSON,\n    created_at INTEGER NOT NULL DEFAULT (cast((julianday(&#39;now&#39;) - 2440587.5) * 86400000 as integer)),\n    PRIMARY KEY (from_id, to_id, rel)\n  );\n\n  CREATE TABLE IF NOT EXISTS tag (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    name TEXT NOT NULL UNIQUE,\n    created_at INTEGER NOT NULL DEFAULT (cast((julianday(&#39;now&#39;) - 2440587.5) * 86400000 as integer))\n  );\n\n  CREATE TABLE IF NOT EXISTS tagging (\n    tag_id INTEGER NOT NULL REFERENCES tag(id) ON DELETE CASCADE,\n    artifact_id INTEGER NOT NULL REFERENCES identity(id) ON DELETE CASCADE,\n    created_at INTEGER NOT NULL DEFAULT (cast((julianday(&#39;now&#39;) - 2440587.5) * 86400000 as integer)),\n    PRIMARY KEY (tag_id, artifact_id)\n  );\n\n  CREATE INDEX IF NOT EXISTS idx_tagging_artifact_id ON tagging(artifact_id);&quot;</span></code>
       </dt>
       
     

@@ -1,5 +1,6 @@
 require "digest/sha256"
 require "json"
+require "jargon"
 
 module Artistry
   class Registry
@@ -16,7 +17,9 @@ module Artistry
     CODE_FORMAT = /\A[A-Z]{1,2}\z/
 
     # Register a new artifact kind. Returns the assigned code.
-    # Schema can be any JSON-serializable value.
+    # Schema is a JSON Schema as any JSON-serializable value. Raises
+    # `InvalidSchema` if it can't be parsed, so it fails here rather than
+    # on every create.
     # Index is a list of field names to create expression indexes on.
     #
     # `code` declares the kind's code (one or two uppercase letters) so it
@@ -38,6 +41,7 @@ module Artistry
       plugin = plugin.downcase
       declared = code
       raise InvalidCode.new(declared) if declared && !CODE_FORMAT.matches?(declared)
+      check_schema(plugin, kind, schema)
 
       # Check if already registered
       existing = db.query_one?(
@@ -108,6 +112,13 @@ module Artistry
       create_indexes(db, plugin, kind, code, index)
 
       code
+    end
+
+    # Parse the schema as validation will, raising `InvalidSchema` on failure.
+    private def self.check_schema(plugin : String, kind : String, schema) : Nil
+      Jargon::Schema.from_json_any(JSON.parse(normalize_schema(schema)))
+    rescue ex
+      raise InvalidSchema.new(plugin, kind, ex.message)
     end
 
     # Create expression indexes on JSON fields for a kind

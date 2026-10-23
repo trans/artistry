@@ -75,7 +75,9 @@ Artistry::Registry.register(
 | **General** | `enum`, `const`, `default`, `description` |
 | **Composition** | `$ref`, `$defs` |
 
-Fields listed in `required` must be present. Fields not in `required` are optional. Use `default` to provide fallback values (applied on create and update, stored in artifact data). Set `additionalProperties: false` to reject unknown fields.
+Fields listed in `required` must be present. Fields not in `required` are optional. Use `default` to provide fallback values (applied on create and update, stored in artifact data). Set `additionalProperties: false` to reject unknown fields. An omitted `type` is inferred from `properties` (object) or `items` (array).
+
+A schema that can't be parsed, such as one declaring `type: "string"` alongside `properties`, or with an invalid `pattern`, raises `Artistry::InvalidSchema` at registration.
 
 ### Create Artifacts
 
@@ -97,7 +99,7 @@ event["status"]  # => "draft" (applied from default)
 ```crystal
 # Invalid type - raises ValidationError
 Artistry::Artifact.create("event", {title: 123, date: "2025-06-15"})
-# => ValidationError: title: expected String, got Int64
+# => ValidationError: title: expected string, got integer
 
 # Constraint violation
 Artistry::Artifact.create("event", {title: "", date: "2025-06-15"})

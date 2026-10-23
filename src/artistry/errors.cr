@@ -25,6 +25,17 @@ module Artistry
     end
   end
 
+  # A kind's schema can't be parsed as a JSON Schema, e.g. it declares
+  # `type: string` alongside `properties`, or has an invalid `pattern`.
+  class InvalidSchema < Error
+    getter plugin : String
+    getter kind : String
+
+    def initialize(@plugin : String, @kind : String, reason : String?)
+      super("#{@plugin}/#{@kind} has an invalid schema: #{reason}")
+    end
+  end
+
   # A kind is already registered under a different code than it now declares.
   class CodeMismatch < Error
     getter plugin : String

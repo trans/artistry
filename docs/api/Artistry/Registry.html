@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Crystal Docs 1.19.1">
-<meta name="crystal_docs.project_version" content="0.9.0-dev">
+<meta name="generator" content="Crystal Docs 1.22.0">
+<meta name="crystal_docs.project_version" content="0.12.0">
 <meta name="crystal_docs.project_name" content="artistry">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../js/doc.js"></script>
 
   <meta name="repository-name" content="artistry">
-  <title>Artistry::Registry - artistry 0.9.0-dev</title>
+  <title>Artistry::Registry - artistry 0.12.0</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../";
   </script>
@@ -45,7 +45,7 @@
       </h1>
 
       <span class="project-version">
-        0.9.0-dev
+        0.12.0
       </span>
     </div>
   </div>
@@ -67,8 +67,33 @@
       
     </li>
   
+  <li class=" " data-id="artistry/Artistry/CodeConflict" data-name="artistry::codeconflict">
+      <a href="../Artistry/CodeConflict.html">CodeConflict</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/CodeMismatch" data-name="artistry::codemismatch">
+      <a href="../Artistry/CodeMismatch.html">CodeMismatch</a>
+      
+    </li>
+  
   <li class=" " data-id="artistry/Artistry/Database" data-name="artistry::database">
       <a href="../Artistry/Database.html">Database</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Error" data-name="artistry::error">
+      <a href="../Artistry/Error.html">Error</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidCode" data-name="artistry::invalidcode">
+      <a href="../Artistry/InvalidCode.html">InvalidCode</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidSchema" data-name="artistry::invalidschema">
+      <a href="../Artistry/InvalidSchema.html">InvalidSchema</a>
       
     </li>
   
@@ -170,6 +195,25 @@
 
 
 
+  
+    <h2>
+      <a id="constant-summary" class="anchor" href="#constant-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+      Constant Summary
+    </h2>
+  
+  <dl>
+    
+      <dt class="entry-const" id="CODE_FORMAT">
+        <strong>CODE_FORMAT</strong> = <code><span class="s">/\A[A-Z]{1,2}\z/</span></code>
+      </dt>
+      
+    
+  </dl>
+
 
 
   
@@ -212,7 +256,7 @@
       <li class="entry-summary">
         <a href="#allocate_code%28db%2Ckind%3AString%29%3AString-class-method" class="signature"><strong>.allocate_code</strong>(db, kind : String) : String</a>
         
-          <div class="summary"><p>Find the shortest unique prefix for a kind name</p></div>
+          <div class="summary"><p>Allocate a free one- or two-letter code for a kind name.</p></div>
         
       </li>
     
@@ -255,7 +299,7 @@
       </li>
     
       <li class="entry-summary">
-        <a href="#register%28kind%3AString%2Cplugin%3AString%2Cschema%2Cdescription%3AString%7CNil%3Dnil%2Csymbol%3AString%7CNil%3Dnil%2Cindex%3AArray%28String%29%3D%5B%5DofString%29%3AString-class-method" class="signature"><strong>.register</strong>(kind : String, plugin : String, schema, description : String | Nil = <span class="n">nil</span>, symbol : String | Nil = <span class="n">nil</span>, index : Array(String) = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>) : String</a>
+        <a href="#register%28kind%3AString%2Cplugin%3AString%2Cschema%2Cdescription%3AString%7CNil%3Dnil%2Csymbol%3AString%7CNil%3Dnil%2Cindex%3AArray%28String%29%3D%5B%5DofString%2Ccode%3AString%7CNil%3Dnil%29%3AString-class-method" class="signature"><strong>.register</strong>(kind : String, plugin : String, schema, description : String | Nil = <span class="n">nil</span>, symbol : String | Nil = <span class="n">nil</span>, index : Array(String) = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>, code : String | Nil = <span class="n">nil</span>) : String</a>
         
           <div class="summary"><p>Register a new artifact kind.</p></div>
         
@@ -406,7 +450,10 @@
       
         <div class="doc">
           
-          <p>Find the shortest unique prefix for a kind name</p>
+          <p>Allocate a free one- or two-letter code for a kind name.</p>
+<p>Tries the first letter, then the first letter followed by each later
+letter of the name, then the first letter followed by A-Z. Codes are
+capped at two letters because slugs (&quot;C42&quot;, &quot;42C&quot;) are parsed that way.</p>
         </div>
       
       <br/>
@@ -519,19 +566,26 @@
       </div>
     </div>
   
-    <div class="entry-detail" id="register(kind:String,plugin:String,schema,description:String|Nil=nil,symbol:String|Nil=nil,index:Array(String)=[]ofString):String-class-method">
+    <div class="entry-detail" id="register(kind:String,plugin:String,schema,description:String|Nil=nil,symbol:String|Nil=nil,index:Array(String)=[]ofString,code:String|Nil=nil):String-class-method">
       <div class="signature">
         
-        def self.<strong>register</strong>(kind : String, plugin : String, schema, description : String | Nil = <span class="n">nil</span>, symbol : String | Nil = <span class="n">nil</span>, index : Array(String) = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>) : String
+        def self.<strong>register</strong>(kind : String, plugin : String, schema, description : String | Nil = <span class="n">nil</span>, symbol : String | Nil = <span class="n">nil</span>, index : Array(String) = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>, code : String | Nil = <span class="n">nil</span>) : String
 
-        <a class="method-permalink" href="#register%28kind%3AString%2Cplugin%3AString%2Cschema%2Cdescription%3AString%7CNil%3Dnil%2Csymbol%3AString%7CNil%3Dnil%2Cindex%3AArray%28String%29%3D%5B%5DofString%29%3AString-class-method">#</a>
+        <a class="method-permalink" href="#register%28kind%3AString%2Cplugin%3AString%2Cschema%2Cdescription%3AString%7CNil%3Dnil%2Csymbol%3AString%7CNil%3Dnil%2Cindex%3AArray%28String%29%3D%5B%5DofString%2Ccode%3AString%7CNil%3Dnil%29%3AString-class-method">#</a>
       </div>
       
         <div class="doc">
           
           <p>Register a new artifact kind. Returns the assigned code.
-Schema can be any JSON-serializable value.
+Schema is a JSON Schema as any JSON-serializable value. Raises
+<code><a href="../Artistry/InvalidSchema.html">InvalidSchema</a></code> if it can't be parsed, so it fails here rather than
+on every create.
 Index is a list of field names to create expression indexes on.</p>
+<p><code><a href="../Artistry/Registry.html#code%3AString-instance-method">#code</a></code> declares the kind's code (one or two uppercase letters) so it
+doesn't depend on registration order. Without it, a code is allocated
+from the kind name. Raises <code><a href="../Artistry/InvalidCode.html">InvalidCode</a></code>, <code><a href="../Artistry/CodeConflict.html">CodeConflict</a></code> (another kind
+owns the code) or <code><a href="../Artistry/CodeMismatch.html">CodeMismatch</a></code> (this kind is already registered
+under a different code).</p>
         </div>
       
       <br/>

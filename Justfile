@@ -31,6 +31,10 @@ check:
 test:
   crystal spec
 
+# Check a database's artifacts against their current schemas (read-only)
+revalidate DB:
+  crystal run scripts/revalidate.cr -- {{DB}}
+
 # Run specific test file
 test-file FILE:
   crystal spec {{FILE}}

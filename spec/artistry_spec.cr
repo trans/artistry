@@ -161,6 +161,36 @@ describe Artistry do
         end
       end
     end
+
+    describe "schema checks" do
+      it "raises InvalidSchema when a declared type contradicts properties" do
+        schema = simple_schema({title: {type: "string", properties: {x: {type: "string"}}}})
+        expect_raises(Artistry::InvalidSchema, /memo\/event.*title.*type: object/) do
+          Artistry::Registry.register(kind: "event", plugin: "memo", schema: schema)
+        end
+      end
+
+      it "raises InvalidSchema for an invalid pattern" do
+        expect_raises(Artistry::InvalidSchema, /memo\/event/) do
+          Artistry::Registry.register(kind: "event", plugin: "memo", schema: simple_schema({title: {type: "string", pattern: "("}}))
+        end
+      end
+
+      it "registers nothing when the schema is invalid" do
+        expect_raises(Artistry::InvalidSchema) do
+          Artistry::Registry.register(kind: "event", plugin: "memo", schema: {type: "string", items: {type: "string"}})
+        end
+        Artistry::Registry.find("memo", "event").should be_nil
+      end
+
+      it "doesn't bump the version for an invalid schema change" do
+        Artistry::Registry.register(kind: "event", plugin: "memo", schema: {type: "object"})
+        expect_raises(Artistry::InvalidSchema) do
+          Artistry::Registry.register(kind: "event", plugin: "memo", schema: {type: "string", properties: {} of String => String})
+        end
+        Artistry::Registry.find("E").not_nil!.version.should eq(1)
+      end
+    end
   end
 
   describe Artistry::Artifact do
@@ -434,6 +464,27 @@ describe Artistry do
         end
       end
 
+      it "names schema types in type errors" do
+        ex = expect_raises(Artistry::ValidationError) do
+          Artistry::Artifact.create("task", {
+            title: 123, count: 1, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
+          })
+        end
+        ex.errors.map { |e| {e.field, e.message} }.should eq([{"title", "expected string, got integer"}])
+      end
+
+      it "validates a schema that omits the root type" do
+        Artistry::Registry.register(
+          kind: "note",
+          plugin: "test",
+          schema: {properties: {count: {type: "integer"}, status: {type: "string", default: "draft"}}}
+        )
+        expect_raises(Artistry::ValidationError, /count: expected integer/) do
+          Artistry::Artifact.create("note", {count: "x"})
+        end
+        Artistry::Artifact.create("note", {count: 1})["status"].as_s.should eq("draft")
+      end
+
       it "accepts valid integer field" do
         artifact = Artistry::Artifact.create("task", {
           title: "Test", count: 42, score: 1.5, done: false, tags: [] of String, meta: {} of String => String,
@@ -619,8 +670,15 @@ describe Artistry do
       end
 
       it "rejects string not matching pattern" do
-        expect_raises(Artistry::ValidationError, /code.*pattern/) do
+        ex = expect_raises(Artistry::ValidationError) do
           Artistry::Artifact.create("constrained", {name: "Valid", code: "lower"})
+        end
+        ex.errors.map { |e| {e.field, e.message} }.should eq([{"code", "must match pattern: ^[A-Z]+$"}])
+      end
+
+      it "doesn't let $ in a pattern match before a trailing newline" do
+        expect_raises(Artistry::ValidationError, /code: must match pattern/) do
+          Artistry::Artifact.create("constrained", {name: "Valid", code: "ABC\n"})
         end
       end
 

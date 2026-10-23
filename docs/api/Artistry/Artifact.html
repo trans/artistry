@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Crystal Docs 1.19.1">
-<meta name="crystal_docs.project_version" content="0.9.0-dev">
+<meta name="generator" content="Crystal Docs 1.22.0">
+<meta name="crystal_docs.project_version" content="0.12.0">
 <meta name="crystal_docs.project_name" content="artistry">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../js/doc.js"></script>
 
   <meta name="repository-name" content="artistry">
-  <title>Artistry::Artifact - artistry 0.9.0-dev</title>
+  <title>Artistry::Artifact - artistry 0.12.0</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../";
   </script>
@@ -45,7 +45,7 @@
       </h1>
 
       <span class="project-version">
-        0.9.0-dev
+        0.12.0
       </span>
     </div>
   </div>
@@ -67,8 +67,33 @@
       
     </li>
   
+  <li class=" " data-id="artistry/Artistry/CodeConflict" data-name="artistry::codeconflict">
+      <a href="../Artistry/CodeConflict.html">CodeConflict</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/CodeMismatch" data-name="artistry::codemismatch">
+      <a href="../Artistry/CodeMismatch.html">CodeMismatch</a>
+      
+    </li>
+  
   <li class=" " data-id="artistry/Artistry/Database" data-name="artistry::database">
       <a href="../Artistry/Database.html">Database</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Error" data-name="artistry::error">
+      <a href="../Artistry/Error.html">Error</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidCode" data-name="artistry::invalidcode">
+      <a href="../Artistry/InvalidCode.html">InvalidCode</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidSchema" data-name="artistry::invalidschema">
+      <a href="../Artistry/InvalidSchema.html">InvalidSchema</a>
       
     </li>
   
@@ -170,6 +195,25 @@
 
 
 
+  
+    <h2>
+      <a id="constant-summary" class="anchor" href="#constant-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+      Constant Summary
+    </h2>
+  
+  <dl>
+    
+      <dt class="entry-const" id="FIND_COLUMNS">
+        <strong>FIND_COLUMNS</strong> = <code><span class="s">&quot;a.id, a.code, a.version, a.data, a.hash, i.created_at, a.new_id, a.updated_at, i.kind_seq&quot;</span></code>
+      </dt>
+      
+    
+  </dl>
+
 
 
   
@@ -198,7 +242,7 @@
       </li>
     
       <li class="entry-summary">
-        <a href="#new%28id%3AInt64%2Ccode%3AString%2Cversion%3AInt32%2Cdata%3AJSON%3A%3AAny%2Chash%3AString%2Ccreated_at%3AInt64%2Cnew_id%3AInt64%7CNil%3Dnil%2Cupdated_at%3AInt64%7CNil%3Dnil%29-class-method" class="signature"><strong>.new</strong>(id : Int64, code : String, version : Int32, data : JSON::Any, hash : String, created_at : Int64, new_id : Int64 | Nil = <span class="n">nil</span>, updated_at : Int64 | Nil = <span class="n">nil</span>)</a>
+        <a href="#new%28id%3AInt64%2Ccode%3AString%2Cversion%3AInt32%2Cdata%3AJSON%3A%3AAny%2Chash%3AString%2Ccreated_at%3AInt64%2Cnew_id%3AInt64%7CNil%3Dnil%2Cupdated_at%3AInt64%7CNil%3Dnil%2Ckind_seq%3AInt64%7CNil%3Dnil%29-class-method" class="signature"><strong>.new</strong>(id : Int64, code : String, version : Int32, data : JSON::Any, hash : String, created_at : Int64, new_id : Int64 | Nil = <span class="n">nil</span>, updated_at : Int64 | Nil = <span class="n">nil</span>, kind_seq : Int64 | Nil = <span class="n">nil</span>)</a>
         
       </li>
     
@@ -226,7 +270,14 @@
       <li class="entry-summary">
         <a href="#find%28slug%3AString%29%3AArtifact%7CNil-class-method" class="signature"><strong>.find</strong>(slug : String) : Artifact | Nil</a>
         
-          <div class="summary"><p>Find by slug (e.g., &quot;E42&quot;, &quot;EV123&quot;)</p></div>
+          <div class="summary"><p>Find by slug — supports both absolute (C99) and kind-relative (99C).</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#find_by_kind_seq%28code%3AString%2Cseq%3AInt64%29%3AArtifact%7CNil-class-method" class="signature"><strong>.find_by_kind_seq</strong>(code : String, seq : Int64) : Artifact | Nil</a>
+        
+          <div class="summary"><p>Find by kind-relative sequence number.</p></div>
         
       </li>
     
@@ -326,6 +377,18 @@
       </li>
     
       <li class="entry-summary">
+        <a href="#kind_seq%3AInt64%7CNil-instance-method" class="signature"><strong>#kind_seq</strong> : Int64 | Nil</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#kind_slug%3AString%7CNil-instance-method" class="signature"><strong>#kind_slug</strong> : String | Nil</a>
+        
+          <div class="summary"><p>Kind-relative slug (e.g., &quot;1E&quot;, &quot;42C&quot;)</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
         <a href="#latest%3AArtifact-instance-method" class="signature"><strong>#latest</strong> : Artifact</a>
         
           <div class="summary"><p>Get the latest version in this artifact's chain</p></div>
@@ -340,7 +403,7 @@
       <li class="entry-summary">
         <a href="#slug%3AString-instance-method" class="signature"><strong>#slug</strong> : String</a>
         
-          <div class="summary"><p>Slug representation (e.g., &quot;E1&quot;, &quot;EV42&quot;)</p></div>
+          <div class="summary"><p>Absolute slug (e.g., &quot;E1&quot;, &quot;C42&quot;)</p></div>
         
       </li>
     
@@ -464,12 +527,12 @@
       </div>
     </div>
   
-    <div class="entry-detail" id="new(id:Int64,code:String,version:Int32,data:JSON::Any,hash:String,created_at:Int64,new_id:Int64|Nil=nil,updated_at:Int64|Nil=nil)-class-method">
+    <div class="entry-detail" id="new(id:Int64,code:String,version:Int32,data:JSON::Any,hash:String,created_at:Int64,new_id:Int64|Nil=nil,updated_at:Int64|Nil=nil,kind_seq:Int64|Nil=nil)-class-method">
       <div class="signature">
         
-        def self.<strong>new</strong>(id : Int64, code : String, version : Int32, data : JSON::Any, hash : String, created_at : Int64, new_id : Int64 | Nil = <span class="n">nil</span>, updated_at : Int64 | Nil = <span class="n">nil</span>)
+        def self.<strong>new</strong>(id : Int64, code : String, version : Int32, data : JSON::Any, hash : String, created_at : Int64, new_id : Int64 | Nil = <span class="n">nil</span>, updated_at : Int64 | Nil = <span class="n">nil</span>, kind_seq : Int64 | Nil = <span class="n">nil</span>)
 
-        <a class="method-permalink" href="#new%28id%3AInt64%2Ccode%3AString%2Cversion%3AInt32%2Cdata%3AJSON%3A%3AAny%2Chash%3AString%2Ccreated_at%3AInt64%2Cnew_id%3AInt64%7CNil%3Dnil%2Cupdated_at%3AInt64%7CNil%3Dnil%29-class-method">#</a>
+        <a class="method-permalink" href="#new%28id%3AInt64%2Ccode%3AString%2Cversion%3AInt32%2Cdata%3AJSON%3A%3AAny%2Chash%3AString%2Ccreated_at%3AInt64%2Cnew_id%3AInt64%7CNil%3Dnil%2Cupdated_at%3AInt64%7CNil%3Dnil%2Ckind_seq%3AInt64%7CNil%3Dnil%29-class-method">#</a>
       </div>
       
       <br/>
@@ -519,7 +582,28 @@
       
         <div class="doc">
           
-          <p>Find by slug (e.g., &quot;E42&quot;, &quot;EV123&quot;)</p>
+          <p>Find by slug — supports both absolute (C99) and kind-relative (99C).</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="find_by_kind_seq(code:String,seq:Int64):Artifact|Nil-class-method">
+      <div class="signature">
+        
+        def self.<strong>find_by_kind_seq</strong>(code : String, seq : Int64) : <a href="../Artistry/Artifact.html">Artifact</a> | Nil
+
+        <a class="method-permalink" href="#find_by_kind_seq%28code%3AString%2Cseq%3AInt64%29%3AArtifact%7CNil-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Find by kind-relative sequence number.</p>
+<p>Looks up the identity with the given code and kind_seq,
+then returns the artifact at that identity.</p>
         </div>
       
       <br/>
@@ -768,6 +852,39 @@ though usually the macro <code>def_hash</code> can be used to generate this meth
       </div>
     </div>
   
+    <div class="entry-detail" id="kind_seq:Int64|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>kind_seq</strong> : Int64 | Nil
+
+        <a class="method-permalink" href="#kind_seq%3AInt64%7CNil-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="kind_slug:String|Nil-instance-method">
+      <div class="signature">
+        
+        def <strong>kind_slug</strong> : String | Nil
+
+        <a class="method-permalink" href="#kind_slug%3AString%7CNil-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Kind-relative slug (e.g., &quot;1E&quot;, &quot;42C&quot;)</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
     <div class="entry-detail" id="latest:Artifact-instance-method">
       <div class="signature">
         
@@ -811,7 +928,7 @@ though usually the macro <code>def_hash</code> can be used to generate this meth
       
         <div class="doc">
           
-          <p>Slug representation (e.g., &quot;E1&quot;, &quot;EV42&quot;)</p>
+          <p>Absolute slug (e.g., &quot;E1&quot;, &quot;C42&quot;)</p>
         </div>
       
       <br/>

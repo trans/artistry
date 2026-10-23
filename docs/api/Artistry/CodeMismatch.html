@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Crystal Docs 1.22.0">
+<meta name="crystal_docs.project_version" content="0.12.0">
+<meta name="crystal_docs.project_name" content="artistry">
+
+
+
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/doc.js"></script>
+
+  <meta name="repository-name" content="artistry">
+  <title>Artistry::CodeMismatch - artistry 0.12.0</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../";
+  </script>
+</head>
+<body>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+<input type="checkbox" id="sidebar-btn">
+<label for="sidebar-btn" id="sidebar-btn-label">
+  <svg class="open" xmlns="http://www.w3.org/2000/svg" height="2em" width="2em" viewBox="0 0 512 512"><title>Open Sidebar</title><path fill="currentColor" d="M80 96v64h352V96H80zm0 112v64h352v-64H80zm0 112v64h352v-64H80z"></path></svg>
+  <svg class="close" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title>Close Sidebar</title><path fill="currentColor" d="m118.6 73.4-45.2 45.2L210.7 256 73.4 393.4l45.2 45.2L256 301.3l137.4 137.3 45.2-45.2L301.3 256l137.3-137.4-45.2-45.2L256 210.7Z"></path></svg>
+</label>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../index.html">
+          artistry
+        </a>
+      </h1>
+
+      <span class="project-version">
+        0.12.0
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent open current" data-id="artistry/Artistry" data-name="artistry">
+      <a href="../Artistry.html">Artistry</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/Artifact" data-name="artistry::artifact">
+      <a href="../Artistry/Artifact.html">Artifact</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/CodeConflict" data-name="artistry::codeconflict">
+      <a href="../Artistry/CodeConflict.html">CodeConflict</a>
+      
+    </li>
+  
+  <li class=" current" data-id="artistry/Artistry/CodeMismatch" data-name="artistry::codemismatch">
+      <a href="../Artistry/CodeMismatch.html">CodeMismatch</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Database" data-name="artistry::database">
+      <a href="../Artistry/Database.html">Database</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Error" data-name="artistry::error">
+      <a href="../Artistry/Error.html">Error</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidCode" data-name="artistry::invalidcode">
+      <a href="../Artistry/InvalidCode.html">InvalidCode</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidSchema" data-name="artistry::invalidschema">
+      <a href="../Artistry/InvalidSchema.html">InvalidSchema</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Link" data-name="artistry::link">
+      <a href="../Artistry/Link.html">Link</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Registry" data-name="artistry::registry">
+      <a href="../Artistry/Registry.html">Registry</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Tag" data-name="artistry::tag">
+      <a href="../Artistry/Tag.html">Tag</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Transaction" data-name="artistry::transaction">
+      <a href="../Artistry/Transaction.html">Transaction</a>
+      
+    </li>
+  
+  <li class="parent " data-id="artistry/Artistry/ValidationError" data-name="artistry::validationerror">
+      <a href="../Artistry/ValidationError.html">ValidationError</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/ValidationError/FieldError" data-name="artistry::validationerror::fielderror">
+      <a href="../Artistry/ValidationError/FieldError.html">FieldError</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Validator" data-name="artistry::validator">
+      <a href="../Artistry/Validator.html">Validator</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">
+    class
+  </span> Artistry::<wbr>CodeMismatch
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Artistry/CodeMismatch.html">Artistry::CodeMismatch</a></li><li class="superclass"><a href="../Artistry/Error.html">Artistry::Error</a></li><li class="superclass">Exception</li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+  <h2>
+    <a id="overview" class="anchor" href="#overview">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Overview
+  </h2>
+
+  <p>A kind is already registered under a different code than it now declares.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      artistry/errors.cr
+    
+    <br/>
+  
+
+
+
+
+
+  
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28plugin%3AString%2Ckind%3AString%2Cregistered_code%3AString%2Cdeclared_code%3AString%29-class-method" class="signature"><strong>.new</strong>(plugin : String, kind : String, registered_code : String, declared_code : String)</a>
+        
+      </li>
+    
+  </ul>
+
+
+  
+
+  
+
+  
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#declared_code%3AString-instance-method" class="signature"><strong>#declared_code</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#kind%3AString-instance-method" class="signature"><strong>#kind</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#plugin%3AString-instance-method" class="signature"><strong>#plugin</strong> : String</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#registered_code%3AString-instance-method" class="signature"><strong>#registered_code</strong> : String</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+  <div class="methods-inherited">
+    
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+    
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+    
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+    
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+    
+  </div>
+
+  
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(plugin:String,kind:String,registered_code:String,declared_code:String)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(plugin : String, kind : String, registered_code : String, declared_code : String)
+
+        <a class="method-permalink" href="#new%28plugin%3AString%2Ckind%3AString%2Cregistered_code%3AString%2Cdeclared_code%3AString%29-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+  
+
+  
+
+  
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="declared_code:String-instance-method">
+      <div class="signature">
+        
+        def <strong>declared_code</strong> : String
+
+        <a class="method-permalink" href="#declared_code%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="kind:String-instance-method">
+      <div class="signature">
+        
+        def <strong>kind</strong> : String
+
+        <a class="method-permalink" href="#kind%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="plugin:String-instance-method">
+      <div class="signature">
+        
+        def <strong>plugin</strong> : String
+
+        <a class="method-permalink" href="#plugin%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="registered_code:String-instance-method">
+      <div class="signature">
+        
+        def <strong>registered_code</strong> : String
+
+        <a class="method-permalink" href="#registered_code%3AString-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+
+</div>
+
+</body>
+</html>

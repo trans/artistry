@@ -42,6 +42,21 @@ since slug parsing assumes 1–2 letter codes.
 ### Schema Validation (JSON Schema)
 Schemas use a JSON Schema subset (powered by the Jargon library). Validation is always enabled (no opt-out). Schemas control strictness via `additionalProperties: false`. Optional fields and defaults are supported natively.
 
+### Jargon 0.22 (0.12.0)
+Moving from Jargon 0.16 to 0.22 made validation stricter in ways that can
+reject data stored under the old version, and `update` re-validates the
+whole merged record:
+- A schema without a root `type` used to parse as a string schema, so it
+  validated nothing and applied no defaults. Jargon now infers `object`
+  from `properties` (and `array` from `items`).
+- `$` in a `pattern` no longer matches before a trailing newline, and the
+  `format` checks are anchored and stricter (email, ipv4).
+- Type errors name schema types: `expected string, got integer`, not
+  `expected String, got Int64`.
+- A declared type that contradicts `properties`/`items` raises in Jargon.
+  `Registry.register` now parses every schema and raises `InvalidSchema`,
+  so a bad schema fails at registration rather than on every create.
+
 ### Owned vs Borrowed Connections
 `Artistry.open("path.db")` creates and owns the connection — `close` shuts it down. `Artistry.open(existing_db)` borrows an external connection — `close` detaches without closing it. Tracked internally via `@@owns_db`. This lets host apps (e.g. Copious) share a single SQLite connection with Artistry.
 
@@ -105,7 +120,7 @@ Artistry::Artifact.create("task", {title: "Test", done: false})
 
 # Invalid - wrong type
 Artistry::Artifact.create("task", {title: 123, done: false})
-# => ValidationError: title: expected String, got Int64
+# => ValidationError: title: expected string, got integer
 
 # Invalid - unknown field (additionalProperties: false)
 Artistry::Artifact.create("task", {title: "Test", done: false, extra: "x"})

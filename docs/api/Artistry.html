@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Crystal Docs 1.19.1">
-<meta name="crystal_docs.project_version" content="0.9.0-dev">
+<meta name="generator" content="Crystal Docs 1.22.0">
+<meta name="crystal_docs.project_version" content="0.12.0">
 <meta name="crystal_docs.project_name" content="artistry">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="js/doc.js"></script>
 
   <meta name="repository-name" content="artistry">
-  <title>Artistry - artistry 0.9.0-dev</title>
+  <title>Artistry - artistry 0.12.0</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "";
   </script>
@@ -45,7 +45,7 @@
       </h1>
 
       <span class="project-version">
-        0.9.0-dev
+        0.12.0
       </span>
     </div>
   </div>
@@ -67,8 +67,33 @@
       
     </li>
   
+  <li class=" " data-id="artistry/Artistry/CodeConflict" data-name="artistry::codeconflict">
+      <a href="Artistry/CodeConflict.html">CodeConflict</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/CodeMismatch" data-name="artistry::codemismatch">
+      <a href="Artistry/CodeMismatch.html">CodeMismatch</a>
+      
+    </li>
+  
   <li class=" " data-id="artistry/Artistry/Database" data-name="artistry::database">
       <a href="Artistry/Database.html">Database</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/Error" data-name="artistry::error">
+      <a href="Artistry/Error.html">Error</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidCode" data-name="artistry::invalidcode">
+      <a href="Artistry/InvalidCode.html">InvalidCode</a>
+      
+    </li>
+  
+  <li class=" " data-id="artistry/Artistry/InvalidSchema" data-name="artistry::invalidschema">
+      <a href="Artistry/InvalidSchema.html">InvalidSchema</a>
       
     </li>
   
@@ -176,6 +201,11 @@
     <br/>
   
     
+      artistry/errors.cr
+    
+    <br/>
+  
+    
       artistry/link.cr
     
     <br/>
@@ -216,7 +246,7 @@
   <dl>
     
       <dt class="entry-const" id="VERSION">
-        <strong>VERSION</strong> = <code><span class="s">&quot;0.9.1&quot;</span></code>
+        <strong>VERSION</strong> = <code><span class="s">&quot;0.12.0&quot;</span></code>
       </dt>
       
     
@@ -264,6 +294,13 @@
     
       <li class="entry-summary">
         <a href="#db_path%3D%28db_path%3AString%29-class-method" class="signature"><strong>.db_path=</strong>(db_path : String)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#next_kind_seq%28code%3AString%29%3AInt64-class-method" class="signature"><strong>.next_kind_seq</strong>(code : String) : Int64</a>
+        
+          <div class="summary"><p>Atomically allocate the next kind_seq for a given artifact code.</p></div>
         
       </li>
     
@@ -397,6 +434,27 @@
 
         <a class="method-permalink" href="#db_path%3D%28db_path%3AString%29-class-method">#</a>
       </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="next_kind_seq(code:String):Int64-class-method">
+      <div class="signature">
+        
+        def self.<strong>next_kind_seq</strong>(code : String) : Int64
+
+        <a class="method-permalink" href="#next_kind_seq%28code%3AString%29%3AInt64-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Atomically allocate the next kind_seq for a given artifact code.</p>
+<p>Inserts or increments the counter in <code>kind_counter</code>, then returns
+the new sequence number. Thread-safe via SQLite's write lock.</p>
+        </div>
       
       <br/>
       <div>
