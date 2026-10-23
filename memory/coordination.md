@@ -11,9 +11,10 @@ behavior; the user asked for this one to go to them (2026-10-23).
 
 - **2026-10-23, jargon 0.22.** Artistry sent a heads-up asking ipck to run
   `just revalidate` on its databases before taking 0.12.0. It went out as
-  @projects, because artistry had no `.ai/` or handle yet, so the thread
-  (message `284f9e2a`, reply `edd4bf25`) is filed in the @projects
-  overseer's mail, not here. The reply: every Copious database it checked
+  @projects, because artistry had no `.ai/` or handle yet, so the reply
+  came to @projects too. The user had the thread moved here (2026-10-23),
+  with ipck's private details redacted: `mail/sent/` (`284f9e2a`) and
+  `mail/received/` (`edd4bf25`). The reply: every Copious database it checked
   passes, with no failures; every kind's schema has a root `type: object`
   and none uses `pattern`, `format` or `multipleOf`; nothing matches on
   error text. Nothing blocks the upgrade. ipck's own CLI also depends on
