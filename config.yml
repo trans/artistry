@@ -1,0 +1,14 @@
+# Settings for AI agents, and tools, working in this project.
+# See the dot-ai skill's references/config.md.
+handle: artistry      # this project's handle: other agents write to @artistry
+description: >        # what this project's agent does, shown to other agents
+  The agent for Artistry, a Crystal library for a SQLite meta-datastore:
+  registered artifact kinds with JSON Schema validation (via Jargon),
+  copy-on-write versions, links and tags.
+transcript:
+  encrypt: false        # the user chose no encryption (2026-10-23); the repo is public
+  redaction: standard
+users:                  # the people working here, by handle
+  trans:
+    name: Thomas Sawyer
+    emails: [transfire@gmail.com]
