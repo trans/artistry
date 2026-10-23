@@ -16,6 +16,7 @@ working on the code needs belongs in the project's own docs, not here.
 |---|---|
 | [status.md](status.md) | Where things stand: the 0.12.0 release, open issues |
 | [coordination.md](coordination.md) | The projects artistry works with, and what passed between them |
+| [indexing.md](indexing.md) | Composite indexes for fast lookups: measurements, decisions, open questions |
 
 Keep each note short and dated (`*Updated YYYY-MM-DD*`), with absolute
 dates and commit hashes. Check the code or `git log` before acting on
