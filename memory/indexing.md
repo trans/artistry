@@ -2,6 +2,11 @@
 
 *Updated 2026-10-24*
 
+**Built, not yet committed** (2026-10-24): `Registry.add_index`,
+`drop_index`, `indexes`; `register(index:)` taking a field or an ordered
+list; the `kind_index` table; migrations on open; `Artistry.optimize`.
+The project's MEMORY.md ("Indexes (0.13)") and README describe it.
+
 The user asked whether datadungeon's consumer-defined indexes would suit
 artistry (2026-10-24). datadungeon keeps one ordered key string per asset
 in an `asset_keys` table and range-scans it by prefix. It needs that
@@ -38,16 +43,30 @@ through the public API, then timed raw SQL under each set of indexes.
 - Index current versions only (`new_id IS NULL`): queries with
   `include_superseded: true` scan (the user, 2026-10-24).
 
+- **Ownership: shared indexes with recorded claims** (the user chose this
+  over a shared pool and per-consumer indexes, 2026-10-24). An index is
+  identified by its ordered field list; `kind_index` records which plugins
+  asked for it; it goes with its last claim. No duplicates, and no consumer
+  breaks another's lookups.
+
+## Found while building
+
+- `PRAGMA optimize` analyzes never-analyzed tables even on a fresh
+  connection, in about 10 ms at 220k rows. Its sampled statistics are rough
+  (2001 rows a value where the truth is 11k-110k) but rank fields well
+  enough. Artistry runs it on open (0x10002) and close.
+- **`idx_artifact_new_id` was a trap once statistics exist.** It indexed
+  every row, so the statistics put `new_id IS NULL` at about 11 rows (rows
+  per distinct value), though it matches nearly every row; the planner then
+  read every current artifact. It now covers superseded rows only (`WHERE
+  new_id IS NOT NULL`), which still serves the successor lookup.
+- End to end at 220k rows: opening an old store converted four per-field
+  indexes into claims and rebuilt `idx_artifact_new_id` in 684 ms (once);
+  a four-field `add_index` took 194 ms; `Artifact.where` on leading fields
+  took 0.02-0.03 ms, `bit` alone 0.06 ms.
+
 ## Open
 
-- **Who owns an index.** Proposed: an index is identified by its ordered
-  field list, and a table records which plugins asked for it. `add_index`
-  adds a claim and creates the index if needed; `drop_index` removes only
-  the caller's claim, and the index goes with its last claim. That gives no
-  duplicate indexes and no consumer breaking another's lookups. Awaiting
-  the user's choice (2026-10-24).
-- **`PRAGMA optimize`** on registering an index and on close, so the
-  planner has statistics. Verify that it analyzes expression indexes.
 - **Todo, later:** lookups combining tags with fields. Tags live in
   `tagging`, outside the JSON, which is the one place a key table like
   datadungeon's would help. Not needed now (the user, 2026-10-24).
