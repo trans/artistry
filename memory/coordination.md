@@ -25,6 +25,12 @@ behavior; the user asked for this one to go to them (2026-10-23).
   artistry 0.11.0 until memo releases with the new source too, then take
   both and switch ipck's own jargon line and lock URLs in the same change.
   Asked it to reply to @artistry from now on. **Waiting on memo's release.**
+- **2026-10-23, 0.13.0 (indexes).** Told @ipck (`mail/sent/`, before the
+  tag) that its `register(index:)` arrays keep their meaning but now cover
+  current versions only, that the first open of each store converts the old
+  indexes (once; 475 ms at 220k artifacts), that open and close write
+  planner statistics, and about `add_index`. Same memo precondition: take
+  0.13.0 instead of 0.12.0 once memo releases.
 
 ## @jargon
 

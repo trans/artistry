@@ -1,14 +1,15 @@
 # Indexing: composite indexes for fast lookups
 
-*Updated 2026-10-24*
+*Updated 2026-10-23*
 
-**Built, not yet committed** (2026-10-24): `Registry.add_index`,
-`drop_index`, `indexes`; `register(index:)` taking a field or an ordered
-list; the `kind_index` table; migrations on open; `Artistry.optimize`.
-The project's MEMORY.md ("Indexes (0.13)") and README describe it.
+**Committed in `82a9805` as 0.13.0, not yet tagged** (2026-10-23):
+`Registry.add_index`, `drop_index`, `indexes`; `register(index:)` taking a
+field or an ordered list; the `kind_index` table; migrations on open;
+`Artistry.optimize`. The project's MEMORY.md ("Indexes (0.13)") and README
+describe it; `bench/indexes.cr` measures it (numbers in its header).
 
 The user asked whether datadungeon's consumer-defined indexes would suit
-artistry (2026-10-24). datadungeon keeps one ordered key string per asset
+artistry (2026-10-23). datadungeon keeps one ordered key string per asset
 in an `asset_keys` table and range-scans it by prefix. It needs that
 because its tags are one row per tag, and a composite index needs the
 values in one row. Artistry's data is already one JSON row, so SQLite can
@@ -32,41 +33,49 @@ Median time to fetch the matching ids.
 With no index, every lookup takes about 58 ms. `register(index:)`'s
 single-field indexes are used (SQLite matches the partial index once
 `code = ?` is bound), but SQLite uses one per query, and with no
-statistics it can pick a poor one. Artistry never runs ANALYZE.
-The benchmark was a scratch script (not kept yet): it built a store
-through the public API, then timed raw SQL under each set of indexes.
+statistics it can pick a poor one. Artistry never ran ANALYZE then.
+These came from a scratch script timing raw SQL, without the `ORDER BY
+a.id` that `Artifact.where` adds; `bench/indexes.cr`, kept in the repo,
+times `Artifact.where` itself.
 
 ## Decided
 
 - Any consumer can add an index on any kind, not just the kind's plugin
-  (the user, 2026-10-24).
+  (the user, 2026-10-23).
 - Index current versions only (`new_id IS NULL`): queries with
-  `include_superseded: true` scan (the user, 2026-10-24).
+  `include_superseded: true` scan (the user, 2026-10-23).
 
 - **Ownership: shared indexes with recorded claims** (the user chose this
-  over a shared pool and per-consumer indexes, 2026-10-24). An index is
+  over a shared pool and per-consumer indexes, 2026-10-23). An index is
   identified by its ordered field list; `kind_index` records which plugins
   asked for it; it goes with its last claim. No duplicates, and no consumer
   breaks another's lookups.
 
 ## Found while building
 
-- `PRAGMA optimize` analyzes never-analyzed tables even on a fresh
-  connection, in about 10 ms at 220k rows. Its sampled statistics are rough
-  (2001 rows a value where the truth is 11k-110k) but rank fields well
-  enough. Artistry runs it on open (0x10002) and close.
+- **Sampled statistics were a trap too.** `PRAGMA optimize` samples by
+  default (its 0x10 bit), stopping near 2000 rows an index, so it put a
+  kind's code at 2001 artifacts (truth: 220k) and `voice` at 2001 (10k).
+  With the two tied, the planner took `idx_artifact_code`, already in id
+  order for `Artifact.where`'s `ORDER BY a.id`: 55-73 ms for `voice` and
+  `voice`+`fmt` despite a composite index. With no statistics at all it
+  does the same. Artistry now runs `PRAGMA optimize=0x10002` on open, on
+  close and in `Artistry.optimize`: every table checked, analyzed in full
+  when it needs it (50 ms of CPU at 220k, once). A spec checks the code
+  index's statistics aren't sampled.
 - **`idx_artifact_new_id` was a trap once statistics exist.** It indexed
   every row, so the statistics put `new_id IS NULL` at about 11 rows (rows
   per distinct value), though it matches nearly every row; the planner then
   read every current artifact. It now covers superseded rows only (`WHERE
   new_id IS NOT NULL`), which still serves the successor lookup.
-- End to end at 220k rows: opening an old store converted four per-field
-  indexes into claims and rebuilt `idx_artifact_new_id` in 684 ms (once);
-  a four-field `add_index` took 194 ms; `Artifact.where` on leading fields
-  took 0.02-0.03 ms, `bit` alone 0.06 ms.
+- End to end at 220k rows (`bench/indexes.cr`): opening an old store
+  converted four per-field indexes and analyzed in 475 ms (once; 0.4-0.9 ms
+  after); a four-field `add_index` took 190-200 ms; `Artifact.where` on
+  leading fields 0.02-0.03 ms, `bit` alone 0.03 ms, `voice`+`fmt=wav`
+  0.6 ms, `voice` alone 29-35 ms (10k artifacts parsed).
 
 ## Open
 
 - **Todo, later:** lookups combining tags with fields. Tags live in
   `tagging`, outside the JSON, which is the one place a key table like
-  datadungeon's would help. Not needed now (the user, 2026-10-24).
+  datadungeon's would help. Not needed now (the user, 2026-10-23).
