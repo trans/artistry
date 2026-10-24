@@ -2,7 +2,7 @@
 
 *Updated 2026-10-23*
 
-**Committed in `82a9805` as 0.13.0, not yet tagged** (2026-10-23):
+**Released as `v0.13.0` (`82a9805`)** (2026-10-23):
 `Registry.add_index`, `drop_index`, `indexes`; `register(index:)` taking a
 field or an ordered list; the `kind_index` table; migrations on open;
 `Artistry.optimize`. The project's MEMORY.md ("Indexes (0.13)") and README

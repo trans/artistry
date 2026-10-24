@@ -29,8 +29,8 @@ behavior; the user asked for this one to go to them (2026-10-23).
   tag) that its `register(index:)` arrays keep their meaning but now cover
   current versions only, that the first open of each store converts the old
   indexes (once; 475 ms at 220k artifacts), that open and close write
-  planner statistics, and about `add_index`. Same memo precondition: take
-  0.13.0 instead of 0.12.0 once memo releases.
+  planner statistics, and about `add_index`, then that it was tagged. Same
+  memo precondition: take 0.13.0 instead of 0.12.0 once memo releases.
 
 ## @jargon
 

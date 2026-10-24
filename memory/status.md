@@ -4,7 +4,7 @@
 
 ## 0.13.0: consumer indexes
 
-- **Committed in `82a9805`, not yet tagged or pushed** (2026-10-23). Any
+- **Released: `v0.13.0` on `82a9805`** (2026-10-23). Any
   plugin can add a composite index on a kind's fields; see
   [indexing.md](indexing.md). The user approved the commit, the version,
   keeping the benchmark (`bench/indexes.cr`) and telling @ipck
