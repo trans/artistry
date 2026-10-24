@@ -58,7 +58,7 @@ Artistry::Registry.register(
   },
   description: "Calendar events",
   symbol: "📅",                 # optional emoji for display
-  index: ["title", "date"]      # creates expression indexes
+  index: ["title", ["date", "priority"]]  # a field, or fields in order (see Indexes)
 )
 # => "E" (assigned code)
 ```
@@ -125,6 +125,43 @@ Artistry::Artifact.where("E")
 # With conditions
 Artistry::Artifact.where("E", priority: 1)
 ```
+
+### Indexes
+
+Without an index, `where` with conditions reads every artifact of the kind.
+An index lists fields in order. A `where` that fixes its leading fields,
+or all of them, reads just that range of it, so a lookup you make often
+can take microseconds where a scan takes tens of milliseconds:
+
+```crystal
+# Any plugin can ask for an index on any kind, for its own common lookups
+Artistry::Registry.add_index("event", ["date", "priority"], plugin: "calendar")
+
+Artistry::Artifact.where("E", date: "2025-06-15")                # leading field
+Artistry::Artifact.where("E", date: "2025-06-15", priority: 1)   # both
+```
+
+Indexes are shared. A plugin asking for fields that are already indexed is
+recorded as wanting that index too, and the index stays until every plugin
+that asked for it has dropped it. `register(index:)` asks on the
+registering plugin's behalf.
+
+```crystal
+Artistry::Registry.indexes("event")      # each index's fields and plugins
+Artistry::Registry.drop_index("event", ["date", "priority"], plugin: "calendar")
+```
+
+Indexes cover current versions only, so `where(..., include_superseded: true)`
+reads every version. A field is a name of letters, digits, `_` and `-`,
+with `.` between nested names (`meta.author`); anything else raises
+`Artistry::InvalidIndex`.
+
+SQLite chooses which index a query uses from statistics it keeps about
+them. Artistry refreshes those statistics (`PRAGMA optimize`, in full, for
+tables that have none or have changed a lot) on open and on close; a
+long-running process can call `Artistry.optimize` now and then. Until a
+store's artifacts have statistics, SQLite may pass over an index and read
+the kind in id order instead.
 
 ### Update (COW - default)
 
@@ -238,6 +275,7 @@ Artistry::Artifact.where("E", include_superseded: true)
 | `link` | Cross-artifact references (`from_id`, `to_id`, `rel`, `data`) - CASCADE delete |
 | `tag` | Unique tag names (`id`, `name`) |
 | `tagging` | Junction table linking tags to artifacts - CASCADE delete both directions |
+| `kind_index` | Which plugins asked for an index on a kind's fields (`code`, `fields`, `plugin`) |
 
 ## Technical Notes
 

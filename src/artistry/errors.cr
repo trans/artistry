@@ -36,6 +36,16 @@ module Artistry
     end
   end
 
+  # An index names no fields, names one twice, or names one that isn't a
+  # field name (see `Registry::FIELD_FORMAT`).
+  class InvalidIndex < Error
+    getter fields : Array(String)
+
+    def initialize(@fields : Array(String), reason : String)
+      super("Invalid index #{@fields.inspect}: #{reason}")
+    end
+  end
+
   # A kind is already registered under a different code than it now declares.
   class CodeMismatch < Error
     getter plugin : String

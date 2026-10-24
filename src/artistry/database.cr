@@ -46,7 +46,14 @@ module Artistry
       );
 
       CREATE INDEX IF NOT EXISTS idx_artifact_code ON artifact(code);
-      CREATE INDEX IF NOT EXISTS idx_artifact_new_id ON artifact(new_id);
+      CREATE INDEX IF NOT EXISTS idx_artifact_new_id ON artifact(new_id) WHERE new_id IS NOT NULL;
+
+      CREATE TABLE IF NOT EXISTS kind_index (
+        code TEXT NOT NULL REFERENCES registry(code),
+        fields TEXT NOT NULL,
+        plugin TEXT NOT NULL,
+        PRIMARY KEY (code, fields, plugin)
+      ) WITHOUT ROWID;
 
       CREATE TABLE IF NOT EXISTS link (
         from_id INTEGER NOT NULL REFERENCES identity(id) ON DELETE CASCADE,
@@ -90,6 +97,18 @@ module Artistry
 
       # Created after the ALTERs so it also works on pre-kind_seq tables.
       db.exec("CREATE INDEX IF NOT EXISTS idx_identity_kind_seq ON identity(code, kind_seq)")
+
+      # Older databases index every row's new_id. Every current-version query
+      # says `new_id IS NULL`, true of nearly every row, yet with statistics
+      # an index over all rows looks selective (rows per distinct value) and
+      # lures the planner into reading every current artifact.
+      new_id_index = db.query_one?("SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'idx_artifact_new_id'", as: String)
+      if new_id_index && !new_id_index.includes?("WHERE")
+        db.exec("DROP INDEX idx_artifact_new_id")
+        db.exec("CREATE INDEX idx_artifact_new_id ON artifact(new_id) WHERE new_id IS NOT NULL")
+      end
+
+      Registry.migrate_legacy_indexes(db)
     end
   end
 end

@@ -57,6 +57,30 @@ whole merged record:
   `Registry.register` now parses every schema and raises `InvalidSchema`,
   so a bad schema fails at registration rather than on every create.
 
+### Indexes (0.13)
+`Registry.add_index(kind, fields, plugin:)` makes a composite expression
+index (`json_extract` of each field, in order), partial on the kind's code
+and `new_id IS NULL`, so `Artifact.where` fixing the leading fields reads
+one range of it. It plays the part of DataDungeon's per-consumer key index,
+which needed a key table because its tags are one row per tag; an
+artifact's fields are already in one row. Indexes are shared: `kind_index`
+records each plugin's claim, and the index goes with its last claim.
+`register(index:)` claims on the registering plugin's behalf. Opening a
+store converts pre-0.13 per-field indexes (`idx_<plugin>_<kind>_<field>`,
+over every version) into claims by the kind's plugin.
+
+`idx_artifact_new_id` covers superseded rows only (`WHERE new_id IS NOT
+NULL`): with statistics, an index over every row looks selective for
+`new_id IS NULL` (rows per distinct value) though that matches nearly every
+row, and the planner then reads every current artifact.
+
+Artistry runs `PRAGMA optimize=0x10002` on open, on close and in
+`Artistry.optimize`: 0x10000 checks every table, and leaving out 0x10
+analyzes in full. Sampled statistics (optimize's default) stop near 2000
+rows an index, so a kind's code looks as selective as a consumer's leading
+field, and `idx_artifact_code`, already in id order for `ORDER BY a.id`,
+wins. With no statistics it wins too. `bench/indexes.cr` measures it all.
+
 ### Owned vs Borrowed Connections
 `Artistry.open("path.db")` creates and owns the connection — `close` shuts it down. `Artistry.open(existing_db)` borrows an external connection — `close` detaches without closing it. Tracked internally via `@@owns_db`. This lets host apps (e.g. Copious) share a single SQLite connection with Artistry.
 

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Crystal Docs 1.22.0">
-<meta name="crystal_docs.project_version" content="0.12.0">
+<meta name="crystal_docs.project_version" content="0.12.0-dev">
 <meta name="crystal_docs.project_name" content="artistry">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="js/doc.js"></script>
 
   <meta name="repository-name" content="artistry">
-  <title>artistry 0.12.0</title>
+  <title>artistry 0.12.0-dev</title>
   <script type="text/javascript">
   CrystalDocs.base_path = "";
   </script>
@@ -45,7 +45,7 @@
       </h1>
 
       <span class="project-version">
-        0.12.0
+        0.12.0-dev
       </span>
     </div>
   </div>
@@ -92,6 +92,11 @@
       
     </li>
   
+  <li class=" " data-id="artistry/Artistry/InvalidIndex" data-name="artistry::invalidindex">
+      <a href="Artistry/InvalidIndex.html">InvalidIndex</a>
+      
+    </li>
+  
   <li class=" " data-id="artistry/Artistry/InvalidSchema" data-name="artistry::invalidschema">
       <a href="Artistry/InvalidSchema.html">InvalidSchema</a>
       
@@ -102,8 +107,18 @@
       
     </li>
   
-  <li class=" " data-id="artistry/Artistry/Registry" data-name="artistry::registry">
+  <li class="parent " data-id="artistry/Artistry/Registry" data-name="artistry::registry">
       <a href="Artistry/Registry.html">Registry</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/Registry/Index" data-name="artistry::registry::index">
+      <a href="Artistry/Registry/Index.html">Index</a>
+      
+    </li>
+  
+</ul>
+
       
     </li>
   
@@ -216,7 +231,7 @@
   },
   description: <span class="s">&quot;Calendar events&quot;</span>,
   symbol: <span class="s">&quot;📅&quot;</span>,                 <span class="c"># optional emoji for display</span>
-  index: [<span class="s">&quot;title&quot;</span>, <span class="s">&quot;date&quot;</span>]      <span class="c"># creates expression indexes</span>
+  index: [<span class="s">&quot;title&quot;</span>, [<span class="s">&quot;date&quot;</span>, <span class="s">&quot;priority&quot;</span>]]  <span class="c"># a field, or fields in order (see Indexes)</span>
 )
 <span class="c"># =&gt; &quot;E&quot; (assigned code)</span></code></pre>
 <h3><a id="supported-schema-keywords" class="anchor" href="#supported-schema-keywords">
@@ -282,6 +297,36 @@ event[<span class="s">&quot;status&quot;</span>]  <span class="c"># =&gt; &quot;
 
 <span class="c"># With conditions</span>
 <span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.where(<span class="s">&quot;E&quot;</span>, priority: <span class="n">1</span>)</code></pre>
+<h3><a id="indexes" class="anchor" href="#indexes">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>Indexes</h3>
+<p>Without an index, <code>where</code> with conditions reads every artifact of the kind.
+An index lists fields in order. A <code>where</code> that fixes its leading fields,
+or all of them, reads just that range of it, so a lookup you make often
+can take microseconds where a scan takes tens of milliseconds:</p>
+<pre><code class="language-crystal"><span class="c"># Any plugin can ask for an index on any kind, for its own common lookups</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Registry</span>.add_index(<span class="s">&quot;event&quot;</span>, [<span class="s">&quot;date&quot;</span>, <span class="s">&quot;priority&quot;</span>], plugin: <span class="s">&quot;calendar&quot;</span>)
+
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.where(<span class="s">&quot;E&quot;</span>, date: <span class="s">&quot;2025-06-15&quot;</span>)                <span class="c"># leading field</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Artifact</span>.where(<span class="s">&quot;E&quot;</span>, date: <span class="s">&quot;2025-06-15&quot;</span>, priority: <span class="n">1</span>)   <span class="c"># both</span></code></pre>
+<p>Indexes are shared. A plugin asking for fields that are already indexed is
+recorded as wanting that index too, and the index stays until every plugin
+that asked for it has dropped it. <code>register(index:)</code> asks on the
+registering plugin's behalf.</p>
+<pre><code class="language-crystal"><span class="t">Artistry</span><span class="t">::</span><span class="t">Registry</span>.indexes(<span class="s">&quot;event&quot;</span>)      <span class="c"># each index&#39;s fields and plugins</span>
+<span class="t">Artistry</span><span class="t">::</span><span class="t">Registry</span>.drop_index(<span class="s">&quot;event&quot;</span>, [<span class="s">&quot;date&quot;</span>, <span class="s">&quot;priority&quot;</span>], plugin: <span class="s">&quot;calendar&quot;</span>)</code></pre>
+<p>Indexes cover current versions only, so <code>where(..., include_superseded: true)</code>
+reads every version. A field is a name of letters, digits, <code>_</code> and <code>-</code>,
+with <code>.</code> between nested names (<code>meta.author</code>); anything else raises
+<code><a href="Artistry/InvalidIndex.html">Artistry::InvalidIndex</a></code>.</p>
+<p>SQLite chooses which index a query uses from statistics it keeps about
+them. Artistry refreshes those statistics (<code>PRAGMA optimize</code>, in full, for
+tables that have none or have changed a lot) on open and on close; a
+long-running process can call <code>Artistry.optimize</code> now and then. Until a
+store's artifacts have statistics, SQLite may pass over an index and read
+the kind in id order instead.</p>
 <h3><a id="update-cow-default" class="anchor" href="#update-cow-default">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>
@@ -389,7 +434,8 @@ link.rel  <span class="c"># =&gt; &quot;attendee&quot;</span></code></pre>
 | <code>artifact</code> | All artifacts (JSON payload, COW tracking via <code>new_id</code>) |
 | <code>link</code> | Cross-artifact references (<code>from_id</code>, <code>to_id</code>, <code>rel</code>, <code>data</code>) - CASCADE delete |
 | <code>tag</code> | Unique tag names (<code>id</code>, <code>name</code>) |
-| <code>tagging</code> | Junction table linking tags to artifacts - CASCADE delete both directions |</p>
+| <code>tagging</code> | Junction table linking tags to artifacts - CASCADE delete both directions |
+| <code>kind_index</code> | Which plugins asked for an index on a kind's fields (<code>code</code>, <code>fields</code>, <code>plugin</code>) |</p>
 <h2><a id="technical-notes" class="anchor" href="#technical-notes">
   <svg class="octicon-link" aria-hidden="true">
     <use href="#octicon-link"/>

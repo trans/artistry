@@ -9,6 +9,20 @@ def simple_schema(props : NamedTuple, required : Array(String) = props.keys.map(
   }
 end
 
+# The SQLite indexes on the artifact table
+def artifact_indexes : Array(String)
+  Artistry.db.query_all("SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'artifact'", as: String)
+end
+
+# A query's plan, a line per step
+def query_plan(sql : String, args : Array(DB::Any)) : String
+  steps = [] of String
+  Artistry.db.query("EXPLAIN QUERY PLAN #{sql}", args: args) do |rs|
+    rs.each { rs.read; rs.read; rs.read; steps << rs.read(String) }
+  end
+  steps.join("\n")
+end
+
 describe Artistry do
   around_each do |example|
     Artistry.open(":memory:") do
@@ -77,24 +91,101 @@ describe Artistry do
       reg2.version.should eq(2)
     end
 
-    it "creates indexes on specified fields" do
-      Artistry::Registry.register(
-        kind: "event",
-        plugin: "memo",
-        schema: {title: "string", date: "datetime"},
-        index: ["title", "date"]
-      )
+    describe "indexes" do
+      line_schema = simple_schema({voice: {type: "string"}, bit: {type: "string"}, beat: {type: "string"}})
 
-      # Check indexes exist via SQLite metadata
-      indexes = [] of String
-      Artistry.db.query("SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'idx_memo_event_%'") do |rs|
-        rs.each do
-          indexes << rs.read(String)
+      it "creates the indexes register asks for: a field, or fields in order" do
+        Artistry::Registry.register(kind: "event", plugin: "memo", schema: {type: "object"}, index: ["title", ["date", "place"]])
+        indexes = Artistry::Registry.indexes("event")
+        indexes.map { |i| {i.fields, i.plugins} }.should eq([{["date", "place"], ["memo"]}, {["title"], ["memo"]}])
+        indexes.each { |i| artifact_indexes.should contain(i.name) }
+      end
+
+      it "lets any plugin add one, shared with others asking for the same fields" do
+        Artistry::Registry.register(kind: "line", plugin: "speech", schema: line_schema)
+        mine = Artistry::Registry.add_index("line", %w[bit beat voice], plugin: "cattacula")
+        theirs = Artistry::Registry.add_index("L", %w[bit beat voice], plugin: "Overlore")
+        theirs.name.should eq(mine.name)
+        theirs.plugins.should eq(["cattacula", "overlore"])
+        artifact_indexes.count(mine.name).should eq(1)
+      end
+
+      it "keeps an index until the last plugin that asked for it drops it" do
+        Artistry::Registry.register(kind: "line", plugin: "speech", schema: line_schema, index: ["voice"])
+        name = Artistry::Registry.add_index("line", "voice", plugin: "cattacula").name
+        Artistry::Registry.drop_index("line", "voice", plugin: "nobody").should be_false
+        Artistry::Registry.drop_index("line", "voice", plugin: "speech").should be_true
+        Artistry::Registry.indexes("line").map(&.plugins).should eq([["cattacula"]])
+        artifact_indexes.should contain(name)
+
+        Artistry::Registry.drop_index("line", "voice", plugin: "cattacula").should be_true
+        Artistry::Registry.indexes("line").should be_empty
+        artifact_indexes.should_not contain(name)
+      end
+
+      it "serves where for its leading fields, over current versions" do
+        Artistry::Registry.register(kind: "line", plugin: "speech", schema: line_schema, index: [%w[voice bit beat]])
+        line = Artistry::Artifact.create("line", {voice: "v1", bit: "b1", beat: "1"})
+        line.update({voice: "v1", bit: "b1", beat: "2"})
+        Artistry::Artifact.where("L", voice: "v1", bit: "b1").map(&.["beat"].as_s).should eq(["2"])
+
+        # Given enough lines that reading them all costs more, and statistics,
+        # the query Artifact.where makes (the code bound as it binds it)
+        # reads the index.
+        20.times { |i| Artistry::Artifact.create("line", {voice: "v#{i % 4}", bit: "b#{i + 2}", beat: "1"}) }
+        Artistry.optimize
+        sql = "SELECT #{Artistry::Artifact::FIND_COLUMNS} FROM artifact a JOIN identity i ON a.id = i.id " \
+              "WHERE a.code = ? AND a.new_id IS NULL " \
+              "AND json_extract(a.data, '$.voice') = ? AND json_extract(a.data, '$.bit') = ? ORDER BY a.id"
+        query_plan(sql, ["L", "v1", "b1"] of DB::Any).should contain(Artistry::Registry.indexes("line").first.name)
+      end
+
+      it "keeps full statistics, so a kind's code doesn't look selective" do
+        Artistry::Registry.register(kind: "line", plugin: "speech", schema: line_schema)
+        Artistry.transaction do
+          2_500.times { |i| Artistry::Artifact.create("line", {voice: "v#{i % 2}", bit: "b#{i}", beat: "1"}) }
+        end
+        Artistry.optimize
+        # A sampled analysis (optimize's default) stops near 2000: "2500 2001".
+        Artistry.db.query_one("SELECT stat FROM sqlite_stat1 WHERE idx = 'idx_artifact_code'", as: String)
+          .should eq("2500 2500")
+      end
+
+      it "rejects fields it can't index" do
+        Artistry::Registry.register(kind: "line", plugin: "speech", schema: line_schema)
+        [[] of String, %w[voice voice], ["it's"], ["two words"], ["1st"], ["meta..author"]].each do |fields|
+          expect_raises(Artistry::InvalidIndex) do
+            Artistry::Registry.add_index("line", fields, plugin: "speech")
+          end
+        end
+        Artistry::Registry.add_index("line", %w[meta.author first-name], plugin: "speech").fields.should eq(%w[meta.author first-name])
+      end
+
+      it "raises for an unknown kind" do
+        expect_raises(Artistry::Error, /Unknown artifact kind: nope/) do
+          Artistry::Registry.add_index("nope", "title", plugin: "speech")
         end
       end
 
-      indexes.should contain("idx_memo_event_title")
-      indexes.should contain("idx_memo_event_date")
+      it "turns older per-field indexes into claims by the kind's plugin" do
+        Artistry::Registry.register(kind: "event", plugin: "memo", schema: {type: "object"})
+        # As register(index:) made them before 0.13.
+        Artistry.db.exec("CREATE INDEX IF NOT EXISTS idx_memo_event_title ON artifact(json_extract(data, '$.title')) WHERE code = 'E'")
+        Artistry::Database.ensure_schema(Artistry.db)
+
+        artifact_indexes.should_not contain("idx_memo_event_title")
+        indexes = Artistry::Registry.indexes("event")
+        indexes.map { |i| {i.fields, i.plugins} }.should eq([{["title"], ["memo"]}])
+        artifact_indexes.should contain(indexes.first.name)
+      end
+
+      it "indexes new_id over superseded versions only, on older databases too" do
+        Artistry.db.exec("DROP INDEX idx_artifact_new_id")
+        Artistry.db.exec("CREATE INDEX idx_artifact_new_id ON artifact(new_id)")
+        Artistry::Database.ensure_schema(Artistry.db)
+        Artistry.db.query_one("SELECT sql FROM sqlite_master WHERE name = 'idx_artifact_new_id'", as: String)
+          .should contain("WHERE new_id IS NOT NULL")
+      end
     end
 
     describe "declared codes" do

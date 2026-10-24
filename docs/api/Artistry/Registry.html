@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Crystal Docs 1.22.0">
-<meta name="crystal_docs.project_version" content="0.12.0">
+<meta name="crystal_docs.project_version" content="0.12.0-dev">
 <meta name="crystal_docs.project_name" content="artistry">
 
 
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="../js/doc.js"></script>
 
   <meta name="repository-name" content="artistry">
-  <title>Artistry::Registry - artistry 0.12.0</title>
+  <title>Artistry::Registry - artistry 0.12.0-dev</title>
   <script type="text/javascript">
     CrystalDocs.base_path = "../";
   </script>
@@ -45,7 +45,7 @@
       </h1>
 
       <span class="project-version">
-        0.12.0
+        0.12.0-dev
       </span>
     </div>
   </div>
@@ -92,6 +92,11 @@
       
     </li>
   
+  <li class=" " data-id="artistry/Artistry/InvalidIndex" data-name="artistry::invalidindex">
+      <a href="../Artistry/InvalidIndex.html">InvalidIndex</a>
+      
+    </li>
+  
   <li class=" " data-id="artistry/Artistry/InvalidSchema" data-name="artistry::invalidschema">
       <a href="../Artistry/InvalidSchema.html">InvalidSchema</a>
       
@@ -102,8 +107,18 @@
       
     </li>
   
-  <li class=" current" data-id="artistry/Artistry/Registry" data-name="artistry::registry">
+  <li class="parent open current" data-id="artistry/Artistry/Registry" data-name="artistry::registry">
       <a href="../Artistry/Registry.html">Registry</a>
+      
+        <ul>
+  
+  <li class=" " data-id="artistry/Artistry/Registry/Index" data-name="artistry::registry::index">
+      <a href="../Artistry/Registry/Index.html">Index</a>
+      
+    </li>
+  
+</ul>
+
       
     </li>
   
@@ -212,6 +227,17 @@
       </dt>
       
     
+      <dt class="entry-const" id="FIELD_FORMAT">
+        <strong>FIELD_FORMAT</strong> = <code><span class="s">/\A[A-Za-z_][A-Za-z0-9_-]*(\.[A-Za-z_][A-Za-z0-9_-]*)*\z/</span></code>
+      </dt>
+      
+      <dd class="entry-const-doc">
+        <p>A field an index can name: letters, digits, <code>_</code> and <code>-</code>, starting with
+a letter or <code>_</code>, with <code>.</code> between the names of nested fields
+(<code>meta.author</code>).</p>
+      </dd>
+      
+    
   </dl>
 
 
@@ -247,6 +273,20 @@
   <ul class="list-summary">
     
       <li class="entry-summary">
+        <a href="#add_index%28kind%3AString%2Cfields%3AArray%28String%29%2C%2A%2Cplugin%3AString%29%3AIndex-class-method" class="signature"><strong>.add_index</strong>(kind : String, fields : Array(String), *, plugin : String) : Index</a>
+        
+          <div class="summary"><p>Ask for an index on a kind's <code>fields</code>, in order, for <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code>'s common lookups: <code><a href="../Artistry/Artifact.html#where%28code%3AString%2Cinclude_superseded%3ABool%3Dfalse%29%3AArray%28Artifact%29-class-method">Artifact.where</a></code> fixing the leading fields (or all of them) then reads one range of the index instead of every artifact of the kind.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#add_index%28kind%3AString%2Cfield%3AString%2C%2A%2Cplugin%3AString%29%3AIndex-class-method" class="signature"><strong>.add_index</strong>(kind : String, field : String, *, plugin : String) : Index</a>
+        
+          <div class="summary"><p>Ask for an index on a kind's <code>fields</code>, in order, for <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code>'s common lookups: <code><a href="../Artistry/Artifact.html#where%28code%3AString%2Cinclude_superseded%3ABool%3Dfalse%29%3AArray%28Artifact%29-class-method">Artifact.where</a></code> fixing the leading fields (or all of them) then reads one range of the index instead of every artifact of the kind.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
         <a href="#all%3AArray%28Registry%29-class-method" class="signature"><strong>.all</strong> : Array(Registry)</a>
         
           <div class="summary"><p>List all registrations</p></div>
@@ -257,6 +297,20 @@
         <a href="#allocate_code%28db%2Ckind%3AString%29%3AString-class-method" class="signature"><strong>.allocate_code</strong>(db, kind : String) : String</a>
         
           <div class="summary"><p>Allocate a free one- or two-letter code for a kind name.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#drop_index%28kind%3AString%2Cfields%3AArray%28String%29%2C%2A%2Cplugin%3AString%29%3ABool-class-method" class="signature"><strong>.drop_index</strong>(kind : String, fields : Array(String), *, plugin : String) : Bool</a>
+        
+          <div class="summary"><p>Withdraw <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code>'s claim on the index over <code>fields</code>, and drop the index once no plugin claims it.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#drop_index%28kind%3AString%2Cfield%3AString%2C%2A%2Cplugin%3AString%29%3ABool-class-method" class="signature"><strong>.drop_index</strong>(kind : String, field : String, *, plugin : String) : Bool</a>
+        
+          <div class="summary"><p>Withdraw <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code>'s claim on the index over <code>fields</code>, and drop the index once no plugin claims it.</p></div>
         
       </li>
     
@@ -294,12 +348,19 @@
       </li>
     
       <li class="entry-summary">
+        <a href="#indexes%28kind%3AString%29%3AArray%28Index%29-class-method" class="signature"><strong>.indexes</strong>(kind : String) : Array(Index)</a>
+        
+          <div class="summary"><p>A kind's indexes, each with the plugins that asked for it.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
         <a href="#normalize_schema%28schema%29%3AString-class-method" class="signature"><strong>.normalize_schema</strong>(schema) : String</a>
         
       </li>
     
       <li class="entry-summary">
-        <a href="#register%28kind%3AString%2Cplugin%3AString%2Cschema%2Cdescription%3AString%7CNil%3Dnil%2Csymbol%3AString%7CNil%3Dnil%2Cindex%3AArray%28String%29%3D%5B%5DofString%2Ccode%3AString%7CNil%3Dnil%29%3AString-class-method" class="signature"><strong>.register</strong>(kind : String, plugin : String, schema, description : String | Nil = <span class="n">nil</span>, symbol : String | Nil = <span class="n">nil</span>, index : Array(String) = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>, code : String | Nil = <span class="n">nil</span>) : String</a>
+        <a href="#register%28kind%3AString%2Cplugin%3AString%2Cschema%2Cdescription%3AString%7CNil%3Dnil%2Csymbol%3AString%7CNil%3Dnil%2Cindex%3AArray%3D%5B%5DofString%2Ccode%3AString%7CNil%3Dnil%29%3AString-class-method" class="signature"><strong>.register</strong>(kind : String, plugin : String, schema, description : String | Nil = <span class="n">nil</span>, symbol : String | Nil = <span class="n">nil</span>, index : Array = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>, code : String | Nil = <span class="n">nil</span>) : String</a>
         
           <div class="summary"><p>Register a new artifact kind.</p></div>
         
@@ -421,6 +482,60 @@
     Class Method Detail
   </h2>
   
+    <div class="entry-detail" id="add_index(kind:String,fields:Array(String),*,plugin:String):Index-class-method">
+      <div class="signature">
+        
+        def self.<strong>add_index</strong>(kind : String, fields : Array(String), *, plugin : String) : <a href="../Artistry/Registry/Index.html">Index</a>
+
+        <a class="method-permalink" href="#add_index%28kind%3AString%2Cfields%3AArray%28String%29%2C%2A%2Cplugin%3AString%29%3AIndex-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Ask for an index on a kind's <code>fields</code>, in order, for <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code>'s common
+lookups: <code><a href="../Artistry/Artifact.html#where%28code%3AString%2Cinclude_superseded%3ABool%3Dfalse%29%3AArray%28Artifact%29-class-method">Artifact.where</a></code> fixing the leading fields (or all of them)
+then reads one range of the index instead of every artifact of the
+kind. Any plugin may ask, for any kind, given by code or name.</p>
+<p>Indexes are shared: asking for fields already indexed records <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code>
+as wanting the index too, and it stays until every plugin that asked
+has dropped it (<code><a href="../Artistry/Registry.html#drop_index%28kind%3AString%2Cfields%3AArray%28String%29%2C%2A%2Cplugin%3AString%29%3ABool-class-method">.drop_index</a></code>). They cover current versions only, so
+<code>where(..., include_superseded: true)</code> doesn't use them. Raises
+<code><a href="../Artistry/InvalidIndex.html">InvalidIndex</a></code>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="add_index(kind:String,field:String,*,plugin:String):Index-class-method">
+      <div class="signature">
+        
+        def self.<strong>add_index</strong>(kind : String, field : String, *, plugin : String) : <a href="../Artistry/Registry/Index.html">Index</a>
+
+        <a class="method-permalink" href="#add_index%28kind%3AString%2Cfield%3AString%2C%2A%2Cplugin%3AString%29%3AIndex-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Ask for an index on a kind's <code>fields</code>, in order, for <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code>'s common
+lookups: <code><a href="../Artistry/Artifact.html#where%28code%3AString%2Cinclude_superseded%3ABool%3Dfalse%29%3AArray%28Artifact%29-class-method">Artifact.where</a></code> fixing the leading fields (or all of them)
+then reads one range of the index instead of every artifact of the
+kind. Any plugin may ask, for any kind, given by code or name.</p>
+<p>Indexes are shared: asking for fields already indexed records <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code>
+as wanting the index too, and it stays until every plugin that asked
+has dropped it (<code><a href="../Artistry/Registry.html#drop_index%28kind%3AString%2Cfields%3AArray%28String%29%2C%2A%2Cplugin%3AString%29%3ABool-class-method">.drop_index</a></code>). They cover current versions only, so
+<code>where(..., include_superseded: true)</code> doesn't use them. Raises
+<code><a href="../Artistry/InvalidIndex.html">InvalidIndex</a></code>.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
     <div class="entry-detail" id="all:Array(Registry)-class-method">
       <div class="signature">
         
@@ -454,6 +569,46 @@
 <p>Tries the first letter, then the first letter followed by each later
 letter of the name, then the first letter followed by A-Z. Codes are
 capped at two letters because slugs (&quot;C42&quot;, &quot;42C&quot;) are parsed that way.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="drop_index(kind:String,fields:Array(String),*,plugin:String):Bool-class-method">
+      <div class="signature">
+        
+        def self.<strong>drop_index</strong>(kind : String, fields : Array(String), *, plugin : String) : Bool
+
+        <a class="method-permalink" href="#drop_index%28kind%3AString%2Cfields%3AArray%28String%29%2C%2A%2Cplugin%3AString%29%3ABool-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Withdraw <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code>'s claim on the index over <code>fields</code>, and drop the
+index once no plugin claims it. Returns whether <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code> had claimed it.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="drop_index(kind:String,field:String,*,plugin:String):Bool-class-method">
+      <div class="signature">
+        
+        def self.<strong>drop_index</strong>(kind : String, field : String, *, plugin : String) : Bool
+
+        <a class="method-permalink" href="#drop_index%28kind%3AString%2Cfield%3AString%2C%2A%2Cplugin%3AString%29%3ABool-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>Withdraw <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code>'s claim on the index over <code>fields</code>, and drop the
+index once no plugin claims it. Returns whether <code><a href="../Artistry/Registry.html#plugin%3AString-instance-method">#plugin</a></code> had claimed it.</p>
         </div>
       
       <br/>
@@ -552,6 +707,25 @@ capped at two letters because slugs (&quot;C42&quot;, &quot;42C&quot;) are parse
       </div>
     </div>
   
+    <div class="entry-detail" id="indexes(kind:String):Array(Index)-class-method">
+      <div class="signature">
+        
+        def self.<strong>indexes</strong>(kind : String) : Array(<a href="../Artistry/Registry/Index.html">Index</a>)
+
+        <a class="method-permalink" href="#indexes%28kind%3AString%29%3AArray%28Index%29-class-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+          <p>A kind's indexes, each with the plugins that asked for it.</p>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
     <div class="entry-detail" id="normalize_schema(schema):String-class-method">
       <div class="signature">
         
@@ -566,12 +740,12 @@ capped at two letters because slugs (&quot;C42&quot;, &quot;42C&quot;) are parse
       </div>
     </div>
   
-    <div class="entry-detail" id="register(kind:String,plugin:String,schema,description:String|Nil=nil,symbol:String|Nil=nil,index:Array(String)=[]ofString,code:String|Nil=nil):String-class-method">
+    <div class="entry-detail" id="register(kind:String,plugin:String,schema,description:String|Nil=nil,symbol:String|Nil=nil,index:Array=[]ofString,code:String|Nil=nil):String-class-method">
       <div class="signature">
         
-        def self.<strong>register</strong>(kind : String, plugin : String, schema, description : String | Nil = <span class="n">nil</span>, symbol : String | Nil = <span class="n">nil</span>, index : Array(String) = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>, code : String | Nil = <span class="n">nil</span>) : String
+        def self.<strong>register</strong>(kind : String, plugin : String, schema, description : String | Nil = <span class="n">nil</span>, symbol : String | Nil = <span class="n">nil</span>, index : Array = <span class="o">[]</span> <span class="k">of</span> <span class="t">String</span>, code : String | Nil = <span class="n">nil</span>) : String
 
-        <a class="method-permalink" href="#register%28kind%3AString%2Cplugin%3AString%2Cschema%2Cdescription%3AString%7CNil%3Dnil%2Csymbol%3AString%7CNil%3Dnil%2Cindex%3AArray%28String%29%3D%5B%5DofString%2Ccode%3AString%7CNil%3Dnil%29%3AString-class-method">#</a>
+        <a class="method-permalink" href="#register%28kind%3AString%2Cplugin%3AString%2Cschema%2Cdescription%3AString%7CNil%3Dnil%2Csymbol%3AString%7CNil%3Dnil%2Cindex%3AArray%3D%5B%5DofString%2Ccode%3AString%7CNil%3Dnil%29%3AString-class-method">#</a>
       </div>
       
         <div class="doc">
@@ -580,7 +754,10 @@ capped at two letters because slugs (&quot;C42&quot;, &quot;42C&quot;) are parse
 Schema is a JSON Schema as any JSON-serializable value. Raises
 <code><a href="../Artistry/InvalidSchema.html">InvalidSchema</a></code> if it can't be parsed, so it fails here rather than
 on every create.
-Index is a list of field names to create expression indexes on.</p>
+<code>index</code> lists the indexes this plugin asks for on the kind, as
+<code><a href="../Artistry/Registry.html#add_index%28kind%3AString%2Cfields%3AArray%28String%29%2C%2A%2Cplugin%3AString%29%3AIndex-class-method">.add_index</a></code> does: each entry a field or an ordered list of fields
+(<code>[&quot;title&quot;, [&quot;voice&quot;, &quot;bit&quot;]]</code>). Leaving one out later doesn't drop it;
+<code><a href="../Artistry/Registry.html#drop_index%28kind%3AString%2Cfields%3AArray%28String%29%2C%2A%2Cplugin%3AString%29%3ABool-class-method">.drop_index</a></code> does.</p>
 <p><code><a href="../Artistry/Registry.html#code%3AString-instance-method">#code</a></code> declares the kind's code (one or two uppercase letters) so it
 doesn't depend on registration order. Without it, a code is allocated
 from the kind name. Raises <code><a href="../Artistry/InvalidCode.html">InvalidCode</a></code>, <code><a href="../Artistry/CodeConflict.html">CodeConflict</a></code> (another kind

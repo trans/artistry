@@ -16,11 +16,28 @@ module Artistry
 
     CODE_FORMAT = /\A[A-Z]{1,2}\z/
 
+    # A field an index can name: letters, digits, `_` and `-`, starting with
+    # a letter or `_`, with `.` between the names of nested fields
+    # (`meta.author`).
+    FIELD_FORMAT = /\A[A-Za-z_][A-Za-z0-9_-]*(\.[A-Za-z_][A-Za-z0-9_-]*)*\z/
+
+    # An index on a kind's fields, in order, over its current versions, and
+    # the plugins that asked for it.
+    record Index, code : String, fields : Array(String), plugins : Array(String) do
+      # The SQLite index's name, as query plans show it.
+      def name : String
+        Registry.index_name(code, fields)
+      end
+    end
+
     # Register a new artifact kind. Returns the assigned code.
     # Schema is a JSON Schema as any JSON-serializable value. Raises
     # `InvalidSchema` if it can't be parsed, so it fails here rather than
     # on every create.
-    # Index is a list of field names to create expression indexes on.
+    # `index` lists the indexes this plugin asks for on the kind, as
+    # `add_index` does: each entry a field or an ordered list of fields
+    # (`["title", ["voice", "bit"]]`). Leaving one out later doesn't drop it;
+    # `drop_index` does.
     #
     # `code` declares the kind's code (one or two uppercase letters) so it
     # doesn't depend on registration order. Without it, a code is allocated
@@ -33,7 +50,7 @@ module Artistry
       schema,
       description : String? = nil,
       symbol : String? = nil,
-      index : Array(String) = [] of String,
+      index : Array = [] of String,
       code : String? = nil
     ) : String
       db = Artistry.conn
@@ -79,8 +96,7 @@ module Artistry
           )
         end
 
-        # Ensure indexes exist (idempotent)
-        create_indexes(db, plugin, kind, code, index)
+        index.each { |fields| add_index(code, fields, plugin: plugin) }
 
         return code
       end
@@ -108,8 +124,7 @@ module Artistry
         code, schema_json, schema_hash
       )
 
-      # Create indexes
-      create_indexes(db, plugin, kind, code, index)
+      index.each { |fields| add_index(code, fields, plugin: plugin) }
 
       code
     end
@@ -121,15 +136,108 @@ module Artistry
       raise InvalidSchema.new(plugin, kind, ex.message)
     end
 
-    # Create expression indexes on JSON fields for a kind
-    private def self.create_indexes(db, plugin : String, kind : String, code : String, fields : Array(String)) : Nil
-      fields.each do |field|
-        index_name = "idx_#{plugin}_#{kind}_#{field}"
-        # CREATE INDEX IF NOT EXISTS is idempotent
-        db.exec(
-          "CREATE INDEX IF NOT EXISTS #{index_name} ON artifact(json_extract(data, '$.#{field}')) WHERE code = '#{code}'"
-        )
+    # Ask for an index on a kind's `fields`, in order, for `plugin`'s common
+    # lookups: `Artifact.where` fixing the leading fields (or all of them)
+    # then reads one range of the index instead of every artifact of the
+    # kind. Any plugin may ask, for any kind, given by code or name.
+    #
+    # Indexes are shared: asking for fields already indexed records `plugin`
+    # as wanting the index too, and it stays until every plugin that asked
+    # has dropped it (`drop_index`). They cover current versions only, so
+    # `where(..., include_superseded: true)` doesn't use them. Raises
+    # `InvalidIndex`.
+    def self.add_index(kind : String, fields : Array(String), *, plugin : String) : Index
+      reg = resolve(kind)
+      check_fields(fields)
+      db = Artistry.conn
+      create_index(db, reg.code, fields)
+      db.exec("INSERT OR IGNORE INTO kind_index (code, fields, plugin) VALUES (?, ?, ?)",
+        reg.code, fields.to_json, plugin.downcase)
+      Index.new(reg.code, fields, claims(db, reg.code, fields))
+    end
+
+    # :ditto:
+    def self.add_index(kind : String, field : String, *, plugin : String) : Index
+      add_index(kind, [field], plugin: plugin)
+    end
+
+    # Withdraw `plugin`'s claim on the index over `fields`, and drop the
+    # index once no plugin claims it. Returns whether `plugin` had claimed it.
+    def self.drop_index(kind : String, fields : Array(String), *, plugin : String) : Bool
+      reg = resolve(kind)
+      db = Artistry.conn
+      claimed = db.exec("DELETE FROM kind_index WHERE code = ? AND fields = ? AND plugin = ?",
+        reg.code, fields.to_json, plugin.downcase).rows_affected > 0
+      db.exec("DROP INDEX IF EXISTS #{index_name(reg.code, fields)}") if claims(db, reg.code, fields).empty?
+      claimed
+    end
+
+    # :ditto:
+    def self.drop_index(kind : String, field : String, *, plugin : String) : Bool
+      drop_index(kind, [field], plugin: plugin)
+    end
+
+    # A kind's indexes, each with the plugins that asked for it.
+    def self.indexes(kind : String) : Array(Index)
+      code = resolve(kind).code
+      rows = Artistry.conn.query_all("SELECT fields, plugin FROM kind_index WHERE code = ? ORDER BY fields, plugin",
+        code, as: {String, String})
+      rows.group_by(&.[0]).map { |fields, claims| Index.new(code, Array(String).from_json(fields), claims.map(&.[1])) }
+    end
+
+    # :nodoc:
+    # The SQLite index over a kind's fields: readable in query plans, and
+    # suffixed with a hash of the field list, so that lists differing only
+    # in punctuation (`a.b`, `a_b`) don't share a name.
+    def self.index_name(code : String, fields : Array(String)) : String
+      "ix_#{code}_#{fields.join("_").gsub(/[^A-Za-z0-9_]/, "_")}_#{Digest::SHA256.hexdigest(fields.to_json)[0, 8]}"
+    end
+
+    # :nodoc:
+    # Before 0.13, `register(index:)` made one index per field, over every
+    # version, named `idx_<plugin>_<kind>_<field>`. Each becomes a claim by
+    # its kind's plugin on that field, over current versions only. One on a
+    # field `add_index` wouldn't take is left as it is.
+    def self.migrate_legacy_indexes(db) : Nil
+      legacy = db.query_all(
+        "SELECT name, sql FROM sqlite_master WHERE type = 'index' AND tbl_name = 'artifact' " \
+        "AND name LIKE 'idx%' AND sql LIKE '%json_extract(data, ''$.%'')) WHERE code = ''%'''",
+        as: {String, String})
+      legacy.each do |name, sql|
+        next unless match = sql.match(/json_extract\(data, '\$\.([^']+)'\)\) WHERE code = '([A-Z]{1,2})'\z/)
+        field, code = match[1], match[2]
+        next unless FIELD_FORMAT.matches?(field)
+        if plugin = db.query_one?("SELECT plugin FROM registry WHERE code = ?", code, as: String)
+          create_index(db, code, [field])
+          db.exec("INSERT OR IGNORE INTO kind_index (code, fields, plugin) VALUES (?, ?, ?)", code, [field].to_json, plugin)
+        end
+        db.exec("DROP INDEX #{name}")
       end
+    end
+
+    # The index over current versions only: a query reaches it by giving the
+    # kind's code and `new_id IS NULL`, as `Artifact.where` does.
+    private def self.create_index(db, code : String, fields : Array(String)) : Nil
+      columns = fields.map { |field| "json_extract(data, '$.#{field}')" }.join(", ")
+      db.exec("CREATE INDEX IF NOT EXISTS #{index_name(code, fields)} ON artifact(#{columns}) " \
+              "WHERE code = '#{code}' AND new_id IS NULL")
+    end
+
+    private def self.check_fields(fields : Array(String)) : Nil
+      raise InvalidIndex.new(fields, "it names no fields") if fields.empty?
+      raise InvalidIndex.new(fields, "it names a field twice") unless fields.uniq.size == fields.size
+      if bad = fields.find { |field| !FIELD_FORMAT.matches?(field) }
+        raise InvalidIndex.new(fields, "#{bad.inspect} isn't a field name: letters, digits, _ and -, with . between nested names")
+      end
+    end
+
+    private def self.claims(db, code : String, fields : Array(String)) : Array(String)
+      db.query_all("SELECT plugin FROM kind_index WHERE code = ? AND fields = ? ORDER BY plugin", code, fields.to_json, as: String)
+    end
+
+    # A kind by code or name, as `Artifact.create` takes it.
+    private def self.resolve(kind : String) : Registry
+      find(kind.upcase) || find_by_kind(kind) || raise Error.new("Unknown artifact kind: #{kind}")
     end
 
     # Allocate a free one- or two-letter code for a kind name.
